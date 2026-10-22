@@ -1,0 +1,92 @@
+---
+title: "Generation of MiXCR sample sheets from Seurat cell barcodes"
+author: "Endika Prieto <endikaprieto@vhio.net>"
+date: "2026-10-22"
+---
+
+# setup
+
+```{r, message=FALSE}
+# --- Load libraries and custom functions ---
+library(Seurat)
+```
+
+# patients
+
+Define patient and Seurat object.
+
+```{r}
+# --- pt3328 ---
+pt <- "pt3328"
+obj <- readRDS(file.path("/mnt/petasan_immuno/raw_data/itag/collabs/sturcotte/scSeq/deconv/seurat", pt, "pt3328_SeuObj_scTransform_RegrOut_mt_feat_mkrs_Tcells_W_clonotypes.rds"))
+# --- pt3385 ---
+pt <- "pt3385"
+obj <- readRDS(file.path("/mnt/petasan_immuno/raw_data/itag/collabs/sturcotte/scSeq/deconv/seurat", pt, "pt3385_SeuObj_scTransform_RegrOut_mt_feat_mkrs_Tcells_W_clonotypes.rds"))
+# --- pt3513 ---
+pt <- "pt3513"
+obj <- readRDS(file.path("/mnt/petasan_immuno/raw_data/itag/collabs/sturcotte/scSeq/deconv/seurat", pt, "pt3513_SeuObj_scTransform_RegrOut_mt_feat_mkrs_Tcells_W_clonotypes.rds"))
+# --- pt600280 ---
+pt <- "pt600280"
+obj <- readRDS(file.path("/mnt/petasan_immuno/raw_data/itag/collabs/sturcotte/scSeq/deconv/seurat", pt, "SeuratObj_scTransform_clustered_slim_TCRmerged.rds"))
+# --- pt600311 ---
+pt <- "pt600311"
+obj <- readRDS(file.path("/mnt/petasan_immuno/raw_data/itag/collabs/sturcotte/scSeq/deconv/seurat", pt, "SeuratObj_scTransform_clustered_slim_TCRmerged.rds"))
+```
+
+Generate MiXCR sample sheets from Seurat cell barcodes.
+
+```{r}
+# --- Define output directory for MiXCR sample sheets ---
+output_dir <- file.path("/mnt/petasan_immuno/raw_data/itag/collabs/sturcotte/scSeq/deconv/seurat", pt, "10x_sample_sheets")
+dir.create(output_dir, recursive = TRUE)
+# --- Extract cell barcodes and sample identifiers ---
+sample_sheet_data <- data.frame(
+  cell_name = colnames(obj),
+  sample_id = as.character(obj$sample_id),
+  stringsAsFactors = FALSE
+)
+# --- Generate a 10x sample sheet for each experimental condition ---
+for (current_sample in sort(unique(sample_sheet_data$sample_id))) {
+  current_cells <- sample_sheet_data$cell_name[
+    sample_sheet_data$sample_id == current_sample
+  ]
+  barcodes <- sub(
+    pattern = paste0("^", current_sample, "_"),
+    replacement = "",
+    x = current_cells
+  )
+  barcodes <- sub(
+    pattern = "-[0-9]+$",
+    replacement = "",
+    x = barcodes
+  )
+  sample_sheet <- data.frame(
+    Sample = rep(current_sample, length(barcodes)),
+    tagPattern = rep("", length(barcodes)),
+    `CELL*` = barcodes,
+    check.names = FALSE,
+    stringsAsFactors = FALSE
+  )
+  sample_output_dir <- file.path(output_dir, current_sample)
+  dir.create(sample_output_dir, recursive = TRUE, showWarnings = FALSE)
+  output_file <- file.path(
+    sample_output_dir,
+    "10x-sample-sheet.tsv"
+  )
+  write.table(
+    sample_sheet,
+    file = output_file,
+    sep = "\t",
+    quote = FALSE,
+    row.names = FALSE,
+    col.names = TRUE,
+    na = ""
+  )
+  message(
+    "Generated: ",
+    output_file,
+    " | Cells: ",
+    nrow(sample_sheet)
+  )
+}
+```
