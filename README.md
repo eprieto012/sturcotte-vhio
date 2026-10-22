@@ -160,6 +160,6 @@ Clonotypes detected in both control conditions are preferred. Controls are selec
 
 ### UMAP plots
 
-IC11 UMAP figures display up to 12 prioritised positive TCRs, following the table order; the complete candidate list remains in the table. Each plot
+IC11 displays up to 12 prioritised positive TCRs, following the table order; the complete candidate list remains in the table. Each plot
 highlights cells belonging to one clonotype, coloured by Seurat cluster, while other cells are grey. Panels correspond to `Unpulsed`, `CD3CD28`,
 `Pept_pool` and individual `R` conditions.
