@@ -11,7 +11,7 @@ date: "2026-10-22"
 sample <- "pt3385"
 seurat <- "pt3385_SeuObj_scTransform_RegrOut_mt_feat_mkrs_Tcells_W_clonotypes.rds"
 # --- Define paths ---
-datapath <- "/home/endikaprieto@vhio.org/sturcotte/patients"
+datapath <- "/mnt/bioinfnas/immuno/eprieto/analyses/sturcotte/patients"
 folder_data <- "deconv"
 datapath_seurat <- "/mnt/petasan_immuno/raw_data/itag/collabs/sturcotte/scSeq/deconv/seurat"
 datapath_cellranger <- "/mnt/petasan_immuno/raw_data/itag/collabs/sturcotte/scSeq/deconv/cellranger"
@@ -1290,7 +1290,7 @@ Save analysis outputs.
 
 ```{r}
 # --- Save plots ---
-save_paths$plots <- file.path("/home/endikaprieto@vhio.org/sturcotte/patients/", sample, "deconv/plots")
+save_paths$plots <- file.path("/mnt/bioinfnas/immuno/eprieto/analyses/sturcotte/patients", sample, "deconv/plots")
 for (plot_name in names(plots_list)) {
   tryCatch(
     save_plot_output(plot_name = plot_name, plot = plots_list[[plot_name]]),
@@ -1308,7 +1308,7 @@ saveRDS(obj_sub, file.path(save_paths$seurat, paste0("obj_", compartment, "_TCR.
 sample <- "pt3385"
 seurat <- "pt3385_SeuObj_scTransform_RegrOut_mt_feat_mkrs_Tcells_W_clonotypes.rds"
 # --- Define paths ---
-datapath <- "/home/endikaprieto@vhio.org/sturcotte/patients"
+datapath <- "/mnt/bioinfnas/immuno/eprieto/analyses/sturcotte/patients"
 folder_data <- "deconv"
 datapath_seurat <- "/mnt/petasan_immuno/raw_data/itag/collabs/sturcotte/scSeq/deconv/seurat"
 datapath_cellranger <- "/mnt/petasan_immuno/raw_data/itag/collabs/sturcotte/scSeq/deconv/cellranger"
@@ -2215,7 +2215,7 @@ plots_list[[paste0("IC11_", compartment, "_prioritized_TCRs")]]
 
 ```{r}
 # --- Save plots ---
-save_paths$plots <- file.path("/home/endikaprieto@vhio.org/sturcotte/patients/", sample, "deconv/plots")
+save_paths$plots <- file.path("/mnt/bioinfnas/immuno/eprieto/analyses/sturcotte/patients", sample, "deconv/plots")
 for (plot_name in names(plots_list)) {
   tryCatch(
     save_plot_output(plot_name = plot_name, plot = plots_list[[plot_name]]),
