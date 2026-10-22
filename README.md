@@ -158,7 +158,7 @@ Negative controls have no significant antigen-induced activation and are marked 
 
 Clonotypes detected in both control conditions are preferred. Controls are selected in the order C1 → C2 → C3 until three are obtained. These are putative controls, not experimentally verified non-reactive TCRs; C3 may reflect limited sampling.
 
-### UMAP plots and functional validation
+### UMAP plots
 
 IC11 UMAP figures display up to 12 prioritised positive TCRs, following the table order; the complete candidate list remains in the table. Each plot
 highlights cells belonging to one clonotype, coloured by Seurat cluster, while other cells are grey. Panels correspond to `Unpulsed`, `CD3CD28`,
