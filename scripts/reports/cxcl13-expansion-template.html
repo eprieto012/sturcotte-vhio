@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CD4_CXCL13 TIL clonotypes - expansion</title>
+<style>
+  :root { --ink: #1c1c1c; --muted: #666; --line: #d9d9d9; --soft: #f5f5f5; }
+  * { box-sizing: border-box; }
+  body { margin: 0; padding: 16px 20px 40px; background: #fff; color: var(--ink);
+         font: 14px/1.4 system-ui, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif; }
+  h1 { font-size: 18px; font-weight: 600; margin: 0 0 4px; }
+  h2 { font-size: 15px; font-weight: 600; margin: 26px 0 6px; }
+  p.lead { margin: 0 0 12px; color: var(--muted); max-width: 980px; }
+  .controls { display: flex; flex-wrap: wrap; gap: 12px 18px; align-items: flex-end; padding: 10px 0 12px;
+              border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); position: sticky; top: 0; background: #fff; z-index: 2; }
+  .controls label { display: flex; flex-direction: column; gap: 3px; font-size: 12px; color: var(--muted); }
+  select, input[type=search] { font: inherit; color: var(--ink); background: #fff; border: 1px solid #b5b5b5; border-radius: 4px; padding: 5px 8px; }
+  .legend { display: flex; flex-wrap: wrap; gap: 4px 16px; margin: 6px 0 8px; font-size: 12px; }
+  .legend .item { display: flex; align-items: center; gap: 5px; }
+  .dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
+  .scroll { overflow-x: auto; }
+  table { border-collapse: collapse; font-size: 13px; }
+  th, td { text-align: left; padding: 4px 14px 4px 0; border-bottom: 1px solid #ececec; white-space: nowrap; }
+  th { color: var(--muted); font-weight: 500; font-size: 12px; }
+  th.sort { cursor: pointer; } th.sort:hover { color: var(--ink); }
+  td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
+  td.seq { font: 12px ui-monospace, Menlo, Consolas, monospace; }
+  .bar { display: flex; height: 12px; width: 260px; background: var(--soft); }
+  .bar span { display: block; height: 100%; }
+  .row { display: flex; flex-wrap: wrap; gap: 22px; align-items: flex-start; }
+  .plot { position: relative; }
+  .plot .title { font-weight: 600; }
+  .plot .sub { font-size: 12px; color: var(--muted); margin-bottom: 4px; max-width: 400px; min-height: 34px; }
+  canvas { display: block; border: 1px solid var(--line); }
+  .tip { position: fixed; pointer-events: none; background: #1c1c1c; color: #fff; font-size: 12px; padding: 5px 8px; border-radius: 4px;
+         max-width: 360px; white-space: pre-line; display: none; z-index: 5; }
+  .tablewrap { max-height: 460px; overflow: auto; border: 1px solid var(--line); padding: 0 10px; }
+  .tablewrap thead th { position: sticky; top: 0; background: #fff; }
+  .note { color: var(--muted); font-size: 12px; margin-top: 6px; max-width: 980px; }
+</style>
+</head>
+<body>
+<h1 id="title"></h1>
+<p class="lead" id="lead"></p>
+
+<div class="controls">
+  <label>Patient <select id="patient"></select></label>
+  <label>Comparison for DEG / DEP <select id="comparison"></select></label>
+  <label>Cells for DEG / DEP <select id="deScope"><option value="all" selected>All patients together</option><option value="patient">Selected patient only</option></select></label>
+  <label>Class in the clonotype list <select id="classFilter"></select></label>
+  <label>Find clonotype or CDR3 <input id="search" type="search" placeholder="e.g. 1131 or CASS" size="18"></label>
+</div>
+
+<h2>How many clonotypes expand</h2>
+<div class="legend" id="legend"></div>
+<div class="scroll"><table id="summary"></table></div>
+<p class="note">Bars: clonotypes of the cluster in each class. A clonotype is counted once per patient, whatever its number of cells.</p>
+
+<h2>Frequency in PE against Bulk, and position in the TIL UMAP</h2>
+<div class="row">
+  <div class="plot"><div class="title">PE vs Bulk frequency (TCR&beta;-seq)</div>
+    <div class="sub" id="scatterSub"></div><canvas id="scatter" data-w="400" data-h="400" role="img" aria-label="PE against Bulk frequency of the Expanded and Not expanded clonotypes"></canvas></div>
+  <div class="plot"><div class="title">TIL UMAP: Expanded</div>
+    <div class="sub" id="umapSub0"></div><canvas id="umap0" data-w="400" data-h="400" role="img" aria-label="TIL UMAP with the cells of Expanded clonotypes"></canvas></div>
+  <div class="plot"><div class="title">TIL UMAP: Not expanded</div>
+    <div class="sub" id="umapSub1"></div><canvas id="umap1" data-w="400" data-h="400" role="img" aria-label="TIL UMAP with the cells of Not expanded clonotypes"></canvas></div>
+</div>
+
+<h2>Clonotype list</h2>
+<div class="note" id="listNote"></div>
+<div class="tablewrap"><table id="clonotypes"></table></div>
+
+<h2>Differential expression between the two groups</h2>
+<p class="note" id="deNote"></p>
+<div class="row">
+  <div class="plot"><div class="title">Genes (RNA)</div><div class="sub" id="degSub"></div>
+    <canvas id="degPlot" data-w="520" data-h="400" role="img" aria-label="Volcano plot of genes"></canvas></div>
+  <div class="plot"><div class="title">Proteins (CITE-seq antibodies)</div><div class="sub" id="depSub"></div>
+    <canvas id="depPlot" data-w="520" data-h="400" role="img" aria-label="Volcano plot of proteins"></canvas></div>
+</div>
+<div class="row" style="margin-top:14px">
+  <div><div class="plot"><div class="title">Genes</div></div><div class="tablewrap"><table id="degTable"></table></div></div>
+  <div><div class="plot"><div class="title">Proteins</div></div><div class="tablewrap"><table id="depTable"></table></div></div>
+</div>
+
+<p class="note" id="footer"></p>
+<div class="tip" id="tip"></div>
+
+<script id="report-data" type="application/json">/*__DATA__*/</script>
+<script>
+"use strict";
+const DATA = JSON.parse(document.getElementById("report-data").textContent);
+const $ = id => document.getElementById(id);
+const el = (tag, cls, text) => { const e = document.createElement(tag); if (cls) e.className = cls; if (text !== undefined) e.textContent = text; return e; };
+const isNA = v => v === null || v === undefined || v === "" || v === "NA";
+const COLORS = ["#d1495b", "#2e6f95", "#e0a100", "#8c8c8c", "#cfcfcf", "#6a4c93", "#3a7d44"];   // one per class, in order
+const classColor = name => COLORS[DATA.classes.indexOf(name) % COLORS.length];
+const UP = "#d1495b", DOWN = "#2e6f95", NS = "#c9c9c9";
+const rows = DATA.clonotypes.rows;
+const fmtFreq = v => isNA(v) ? "–" : v === 0 ? "0" : Number(v).toExponential(2);
+const tip = $("tip");
+const hits = new Map();                         // canvas id -> [{x, y, text}] for the tooltips
+
+// canvases are drawn at the pixel density of the screen (sharp on high-resolution displays); all drawing code
+// works in the logical size given by data-w / data-h
+function prep(id) {
+  const cv = $(id), W = Number(cv.dataset.w), H = Number(cv.dataset.h), dpr = window.devicePixelRatio || 1;
+  cv.style.width = W + "px"; cv.style.height = H + "px";
+  cv.width = Math.round(W * dpr); cv.height = Math.round(H * dpr);
+  const g = cv.getContext("2d"); g.setTransform(dpr, 0, 0, dpr, 0, 0);
+  return { g, W, H };
+}
+function showTip(e, canvasId) {
+  const list = hits.get(canvasId) || [], box = e.target.getBoundingClientRect();
+  const sx = Number(e.target.dataset.w) / box.width, mx = (e.clientX - box.left) * sx, my = (e.clientY - box.top) * sx;
+  let best = null, bd = 100;
+  for (const h of list) { const d = (h.x - mx) ** 2 + (h.y - my) ** 2; if (d < bd) { bd = d; best = h; } }
+  if (!best) { tip.style.display = "none"; return; }
+  tip.textContent = best.text; tip.style.display = "block";
+  tip.style.left = Math.min(e.clientX + 14, window.innerWidth - 380) + "px"; tip.style.top = (e.clientY + 14) + "px";
+}
+["scatter", "degPlot", "depPlot"].forEach(id => { $(id).addEventListener("mousemove", e => showTip(e, id)); $(id).addEventListener("mouseleave", () => tip.style.display = "none"); });
+
+const selectedRows = () => rows.filter(r => $("patient").value === "all" || r.patient === $("patient").value);
+
+// ---- summary -----------------------------------------------------------------
+function renderSummary() {
+  const leg = $("legend"); leg.innerHTML = "";
+  DATA.classes.forEach(c => { const it = el("span", "item"); const d = el("span", "dot"); d.style.background = classColor(c); it.appendChild(d); it.appendChild(el("span", null, c)); leg.appendChild(it); });
+  const t = $("summary"); t.innerHTML = "";
+  const head = el("tr"); ["Patient", "Clonotypes", ...DATA.classes, "Expanded among classified", "Cells in cluster"].forEach((h, i) => head.appendChild(el("th", i ? "num" : null, h)));
+  head.appendChild(el("th", null, "")); t.appendChild(head);
+  const line = (label, rs, bold) => {
+    const counts = DATA.classes.map(c => rs.filter(r => r.class === c).length);
+    const classified = counts[0] + counts[1] + counts[2];
+    const tr = el("tr"); const first = el("td", null, label); if (bold) first.style.fontWeight = "600"; tr.appendChild(first);
+    tr.appendChild(el("td", "num", String(rs.length)));
+    counts.forEach(n => tr.appendChild(el("td", "num", String(n))));
+    tr.appendChild(el("td", "num", classified ? counts[0] + "/" + classified + " (" + Math.round(100 * counts[0] / classified) + "%)" : "–"));
+    tr.appendChild(el("td", "num", String(rs.reduce((a, r) => a + r.cells_in_cluster, 0))));
+    const cellBar = el("td"), bar = el("div", "bar");
+    counts.forEach((n, i) => { if (!n) return; const s = el("span"); s.style.width = (100 * n / rs.length) + "%"; s.style.background = classColor(DATA.classes[i]); s.title = DATA.classes[i] + ": " + n; bar.appendChild(s); });
+    cellBar.appendChild(bar); tr.appendChild(cellBar); t.appendChild(tr);
+  };
+  DATA.patients.forEach(p => { const rs = rows.filter(r => r.patient === p); if (rs.length) line(p, rs, p === $("patient").value); });
+  line("All patients", rows, $("patient").value === "all");
+}
+
+// ---- scatter PE vs Bulk -------------------------------------------------------
+function renderScatter() {
+  const { g, W, H } = prep("scatter"), L = 62, R = 12, T = 12, B = 44;
+  const rs = selectedRows().filter(r => !isNA(r.PE_freq) && !isNA(r.Bulk_freq) && (r.class === DATA.classes[0] || r.class === DATA.classes[1]));
+  g.clearRect(0, 0, W, H); g.fillStyle = "#fff"; g.fillRect(0, 0, W, H);
+  const pos = rs.flatMap(r => [r.PE_freq, r.Bulk_freq]).filter(v => v > 0);
+  const lo = Math.floor(Math.log10(Math.min(1e-6, ...pos))), hi = Math.ceil(Math.log10(Math.max(1e-2, ...pos)));
+  const zero = lo - 0.7;                                   // clonotypes absent from a repertoire sit on a separate band
+  const sx = v => L + ((v > 0 ? Math.log10(v) : zero) - (zero - 0.3)) / (hi - zero + 0.3) * (W - L - R);
+  const sy = v => H - B - ((v > 0 ? Math.log10(v) : zero) - (zero - 0.3)) / (hi - zero + 0.3) * (H - T - B);
+  g.strokeStyle = "#e3e3e3"; g.fillStyle = "#666"; g.font = "11px system-ui, sans-serif"; g.lineWidth = 1;
+  for (let e = lo; e <= hi; e++) {
+    const x = sx(10 ** e), y = sy(10 ** e);
+    g.beginPath(); g.moveTo(x, T); g.lineTo(x, H - B); g.moveTo(L, y); g.lineTo(W - R, y); g.stroke();
+    g.textAlign = "center"; g.fillText("1e" + e, x, H - B + 14); g.textAlign = "right"; g.fillText("1e" + e, L - 6, y + 4);
+  }
+  g.textAlign = "center"; g.fillText("0", sx(0), H - B + 14); g.textAlign = "right"; g.fillText("0", L - 6, sy(0) + 4);
+  g.strokeStyle = "#999"; g.setLineDash([4, 3]); g.beginPath(); g.moveTo(sx(10 ** lo), sy(10 ** lo)); g.lineTo(sx(10 ** hi), sy(10 ** hi)); g.stroke(); g.setLineDash([]);
+  g.fillStyle = "#1c1c1c"; g.textAlign = "center"; g.fillText("Frequency in Bulk", (L + W - R) / 2, H - 8);
+  g.save(); g.translate(14, (T + H - B) / 2); g.rotate(-Math.PI / 2); g.fillText("Frequency in PE", 0, 0); g.restore();
+  const list = [];
+  rs.forEach(r => {
+    const x = sx(r.Bulk_freq), y = sy(r.PE_freq), rad = 2.5 + Math.min(6, Math.sqrt(r.cells_in_cluster));
+    g.beginPath(); g.arc(x, y, rad, 0, 2 * Math.PI); g.fillStyle = classColor(r.class); g.globalAlpha = 0.75; g.fill(); g.globalAlpha = 1;
+    list.push({ x, y, text: r.patient + " · " + r.clonotype + "\n" + (r.cdr3_aa || "") + "\n" + r.class + "\nPE " + fmtFreq(r.PE_freq) + " · Bulk " + fmtFreq(r.Bulk_freq) + "\n" + r.cells_in_cluster + " cells in the cluster" });
+  });
+  hits.set("scatter", list);
+  $("scatterSub").textContent = rs.filter(r => r.class === DATA.classes[0]).length + " Expanded and " + rs.filter(r => r.class === DATA.classes[1]).length + " Not expanded clonotypes. Above the dashed line: higher in PE than in Bulk. Point size: cells in the cluster.";
+}
+
+// ---- UMAP: one panel per class (Expanded, Not expanded) ---------------------------
+function renderUmap() {
+  const u = DATA.umap, pIndex = DATA.patients.indexOf($("patient").value);
+  [0, 1].forEach(k => {
+    const { g, W } = prep("umap" + k), pad = W * 0.04, s = (W - 2 * pad) / DATA.quant;
+    g.fillStyle = "#fff"; g.fillRect(0, 0, W, W);
+    g.fillStyle = "#dcdcdc";                                  // the other TIL cells (of the selected patient, or of all of them)
+    for (let i = 0; i < u.x.length; i++) {
+      if (pIndex >= 0 && u.patient[i] !== pIndex) continue;
+      g.fillRect(pad + u.x[i] * s - 0.6, W - pad - u.y[i] * s - 0.6, 1.2, 1.2);
+    }
+    let n = 0; g.fillStyle = COLORS[k];
+    for (let i = 0; i < u.x.length; i++) {
+      if (u.class[i] !== k || (pIndex >= 0 && u.patient[i] !== pIndex)) continue;
+      g.beginPath(); g.arc(pad + u.x[i] * s, W - pad - u.y[i] * s, 2.6, 0, 2 * Math.PI); g.fill(); n++;
+    }
+    $("umapSub" + k).textContent = n + " cells of " + DATA.cluster + " from " + DATA.classes[k] + " clonotypes; other TIL cells of " +
+      (pIndex >= 0 ? DATA.patients[pIndex] : "the " + DATA.patients.length + " patients") + " in grey.";
+  });
+}
+
+// ---- clonotype list ------------------------------------------------------------
+const LIST_COLUMNS = [["patient", "Patient"], ["clonotype", "Clonotype"], ["cdr3_aa", "CDR3β"], ["class", "Class"], ["cells_in_cluster", "Cells in cluster", 1],
+  ["cells_in_TILs", "Cells in TILs", 1], ["cells_PD1p", "PD1p", 1], ["cells_PD1d", "PD1d", 1], ["Tumor_freq", "Tumor", 2], ["PE_freq", "PE", 2], ["Bulk_freq", "Bulk", 2],
+  ["TIDAL01_freq", "TIDAL01", 2], ["log2_PE_vs_Bulk", "log2 PE/Bulk", 1]];
+let sortKey = "cells_in_cluster", sortDir = -1;
+function renderList() {
+  const q = $("search").value.trim().toLowerCase(), cf = $("classFilter").value;
+  let rs = selectedRows().filter(r => (cf === "all" || r.class === cf) &&
+    (!q || String(r.clonotype).toLowerCase().includes(q) || String(r.cdr3_aa || "").toLowerCase().includes(q)));
+  rs = rs.slice().sort((a, b) => { const x = a[sortKey], y = b[sortKey];
+    if (isNA(x) && isNA(y)) return 0; if (isNA(x)) return 1; if (isNA(y)) return -1;
+    return (typeof x === "number" ? x - y : String(x).localeCompare(String(y))) * sortDir; });
+  const t = $("clonotypes"); t.innerHTML = "";
+  const thead = el("thead"), head = el("tr");
+  LIST_COLUMNS.forEach(([key, label, kind]) => { const th = el("th", "sort" + (kind ? " num" : ""), label + (key === sortKey ? (sortDir < 0 ? " ▼" : " ▲") : ""));
+    th.addEventListener("click", () => { if (sortKey === key) sortDir = -sortDir; else { sortKey = key; sortDir = kind ? -1 : 1; } renderList(); }); head.appendChild(th); });
+  thead.appendChild(head); t.appendChild(thead);
+  const body = el("tbody");
+  rs.forEach(r => { const tr = el("tr");
+    LIST_COLUMNS.forEach(([key, , kind]) => { const v = r[key];
+      const td = el("td", kind ? "num" : key === "cdr3_aa" ? "seq" : null, kind === 2 ? fmtFreq(v) : isNA(v) ? "–" : String(v));
+      if (key === "class") { const d = el("span", "dot"); d.style.background = classColor(v); d.style.marginRight = "6px"; td.prepend(d); }
+      tr.appendChild(td); });
+    body.appendChild(tr); });
+  t.appendChild(body);
+  $("listNote").textContent = rs.length + " clonotypes. Click a column header to sort. Frequencies are fractions of the productive repertoire; – means the clonotype (or the repertoire) is not in the TCRβ-seq data.";
+}
+
+// ---- DEG / DEP -----------------------------------------------------------------
+const shortName = f => f.replace(/^TotalSeq-\S+\s+/, "").replace(/^anti-(human|mouse)(-(human|mouse|rat))*[- ]/i, "").replace(/ Antibody$/, "");
+function volcano(canvasId, res, subId) {
+  const { g, W, H } = prep(canvasId), L = 52, R = 14, T = 14, B = 42;
+  g.fillStyle = "#fff"; g.fillRect(0, 0, W, H);
+  if (!res) { g.fillStyle = "#666"; g.font = "13px system-ui, sans-serif"; g.fillText("Not enough cells in both groups for " + scopeLabel(), 40, H / 2); hits.set(canvasId, []); $(subId).textContent = ""; return; }
+  const n = res.feature.length, y = res.p.map(p => -Math.log10(Math.max(p, 1e-300)));
+  const xmax = Math.max(0.5, ...res.effect.map(Math.abs)) * 1.05, ymax = Math.max(2, ...y) * 1.05;
+  const sx = v => L + (v + xmax) / (2 * xmax) * (W - L - R), sy = v => H - B - v / ymax * (H - T - B);
+  g.strokeStyle = "#e3e3e3"; g.lineWidth = 1; g.fillStyle = "#666"; g.font = "11px system-ui, sans-serif";
+  const xstep = xmax > 4 ? 2 : xmax > 2 ? 1 : 0.5;
+  for (let v = -Math.floor(xmax / xstep) * xstep; v <= xmax; v += xstep) { g.beginPath(); g.moveTo(sx(v), T); g.lineTo(sx(v), H - B); g.stroke(); g.textAlign = "center"; g.fillText(String(Math.round(v * 10) / 10), sx(v), H - B + 14); }
+  const ystep = ymax > 40 ? 10 : ymax > 16 ? 4 : ymax > 8 ? 2 : 1;
+  for (let v = 0; v <= ymax; v += ystep) { g.beginPath(); g.moveTo(L, sy(v)); g.lineTo(W - R, sy(v)); g.stroke(); g.textAlign = "right"; g.fillText(String(v), L - 6, sy(v) + 4); }
+  g.strokeStyle = "#999"; g.beginPath(); g.moveTo(sx(0), T); g.lineTo(sx(0), H - B); g.stroke();
+  g.fillStyle = "#1c1c1c"; g.textAlign = "center"; g.fillText(res.effect_name + "  (right: higher in " + currentComparison().group_1 + ")", (L + W - R) / 2, H - 8);
+  g.save(); g.translate(13, (T + H - B) / 2); g.rotate(-Math.PI / 2); g.fillText("-log10 P", 0, 0); g.restore();
+  const list = [], sig = [];
+  const order = Array.from({ length: n }, (_, i) => i).sort((a, b) => res.p[b] - res.p[a]);    // most significant drawn last
+  for (const i of order) {
+    const s = res.padj[i] < DATA.padj_cutoff, x = sx(res.effect[i]), yy = sy(y[i]);
+    g.beginPath(); g.arc(x, yy, s ? 3.2 : 2, 0, 2 * Math.PI); g.fillStyle = s ? (res.effect[i] > 0 ? UP : DOWN) : NS; g.fill();
+    if (s) sig.push(i);
+    list.push({ x, y: yy, text: shortName(res.feature[i]) + "\n" + res.effect_name + " " + res.effect[i] + "\nadjusted P " + res.padj[i] + "\n% cells " + Math.round(100 * res.pct_1[i]) + " vs " + Math.round(100 * res.pct_2[i]) +
+      "\nsame direction in " + res.same[i] + " of " + res.tested[i] + " patients" });
+  }
+  g.fillStyle = "#1c1c1c"; g.font = "11px system-ui, sans-serif";
+  sig.sort((a, b) => res.p[a] - res.p[b]).slice(0, 14).forEach(i => { const right = res.effect[i] > 0; g.textAlign = right ? "left" : "right"; g.fillText(shortName(res.feature[i]), sx(res.effect[i]) + (right ? 5 : -5), sy(y[i]) + 3); });
+  hits.set(canvasId, list);
+  const up = sig.filter(i => res.effect[i] > 0).length;
+  $(subId).textContent = res.cells_1 + " vs " + res.cells_2 + " cells · " + n + " tested · adjusted P < " + DATA.padj_cutoff + ": " + up + " higher, " + (sig.length - up) + " lower in " + currentComparison().group_1;
+}
+function deTable(tableId, res) {
+  const t = $(tableId); t.innerHTML = "";
+  if (!res) return;
+  const thead = el("thead"), head = el("tr");
+  ["Feature", res.effect_name, "% cells " + currentComparison().group_1, "% cells other group", "Adjusted P", "Patients, same direction"].forEach((h, i) => head.appendChild(el("th", i ? "num" : null, h)));
+  thead.appendChild(head); t.appendChild(thead);
+  const idx = Array.from({ length: res.feature.length }, (_, i) => i).sort((a, b) => res.p[a] - res.p[b]);
+  let chosen = idx.filter(i => res.padj[i] < DATA.padj_cutoff);
+  if (chosen.length < 15) chosen = idx.slice(0, 15);            // nothing or little significant: show the top of the list anyway
+  const body = el("tbody");
+  chosen.forEach(i => { const tr = el("tr"); const s = res.padj[i] < DATA.padj_cutoff;
+    const f = el("td", null, shortName(res.feature[i])); if (s) { f.style.fontWeight = "600"; f.style.color = res.effect[i] > 0 ? UP : DOWN; } tr.appendChild(f);
+    [res.effect[i], Math.round(100 * res.pct_1[i]), Math.round(100 * res.pct_2[i]), res.padj[i], res.same[i] + " / " + res.tested[i]].forEach(v => tr.appendChild(el("td", "num", String(v))));
+    body.appendChild(tr); });
+  t.appendChild(body);
+}
+const currentComparison = () => DATA.comparisons[$("comparison").value];
+// results are stored per comparison and per scope: all the patients together, or one patient
+const scopeKey = () => $("deScope").value === "patient" && $("patient").value !== "all" ? $("patient").value : "all";
+const scopeLabel = () => scopeKey() === "all" ? "all patients together" : scopeKey();
+function renderDE() {
+  const name = $("comparison").value, c = currentComparison(), key = "|" + scopeKey();
+  const deg = DATA.results["DEG_" + name + key] || null, dep = DATA.results["DEP_" + name + key] || null;
+  volcano("degPlot", deg, "degSub"); volcano("depPlot", dep, "depSub");
+  deTable("degTable", deg); deTable("depTable", dep);
+  $("deNote").textContent = "Cells of " + DATA.cluster + " (" + scopeLabel() + "): " + c.group_1 + " against " + c.group_2 + ". Wilcoxon rank-sum test, Bonferroni-adjusted P (Seurat FindMarkers). " +
+    "Coloured: adjusted P < " + DATA.padj_cutoff + ". Tables list the significant features (in bold), or the 15 with the lowest P when fewer are significant." +
+    (scopeKey() === "all" ? " The last column counts the patients, among those with enough cells in both groups, where the difference has the same sign."
+                          : " With one patient the groups are small, so few features reach significance.") +
+    ($("deScope").value === "patient" && $("patient").value === "all" ? " Choose a patient above to see its own comparison." : "");
+}
+
+// ---- controls ------------------------------------------------------------------
+function renderAll() { renderSummary(); renderScatter(); renderUmap(); renderList(); }
+const addOptions = (sel, pairs) => pairs.forEach(([v, label]) => { const o = el("option", null, label); o.value = v; sel.appendChild(o); });
+addOptions($("patient"), [["all", "All patients"], ...DATA.patients.filter(p => rows.some(r => r.patient === p)).map(p => [p, p])]);
+addOptions($("comparison"), Object.keys(DATA.comparisons).map(k => [k, DATA.comparisons[k].group_1 + "  vs  " + DATA.comparisons[k].group_2]));
+addOptions($("classFilter"), [["all", "All classes"], ...DATA.classes.map(c => [c, c])]);
+$("patient").addEventListener("change", () => { renderAll(); renderDE(); });
+$("deScope").addEventListener("change", renderDE);
+let resizeTimer = null;                                    // redraw when the zoom level (pixel density) changes
+window.addEventListener("resize", () => { clearTimeout(resizeTimer); resizeTimer = setTimeout(() => { renderAll(); renderDE(); }, 150); });
+$("classFilter").addEventListener("change", renderList);
+$("search").addEventListener("input", renderList);
+$("comparison").addEventListener("change", renderDE);
+$("title").textContent = DATA.cluster + " TIL clonotypes: expansion from Bulk to PE and what distinguishes the cells that expand";
+$("lead").textContent = "Clonotypes of the TIL cells in cluster " + DATA.cluster + ", classified with " + DATA.classification +
+  ": Expanded when the frequency in PE (primary expansion) is higher than in Bulk.";
+$("footer").textContent = "Generated by Endika Prieto (endikaprieto@vhio.net) · " + DATA.generated;
+renderAll(); renderDE();
+</script>
+</body>
+</html>

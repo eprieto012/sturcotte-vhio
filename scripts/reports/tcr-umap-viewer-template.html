@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Prioritized TCRs - UMAP viewer</title>
+<style>
+  :root { --panel: 190px; --ink: #1c1c1c; --muted: #666; --line: #d9d9d9; --bg: #ffffff; --soft: #f5f5f5; }
+  * { box-sizing: border-box; }
+  body { margin: 0; padding: 16px 20px 40px; background: var(--bg); color: var(--ink);
+         font: 14px/1.4 system-ui, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif; }
+  h1 { font-size: 18px; font-weight: 600; margin: 0 0 12px; }
+  .controls { display: flex; flex-wrap: wrap; gap: 12px 18px; align-items: flex-end;
+              padding-bottom: 12px; border-bottom: 1px solid var(--line); }
+  .controls label { display: flex; flex-direction: column; gap: 3px; font-size: 12px; color: var(--muted); }
+  .controls label.inline { flex-direction: row; align-items: center; gap: 6px; padding-bottom: 6px; }
+  select, button, input[type=search] { font: inherit; color: var(--ink); background: #fff; border: 1px solid #b5b5b5;
+                   border-radius: 4px; padding: 5px 8px; }
+  button { cursor: pointer; }
+  button:hover { background: var(--soft); }
+  #clone, #found { min-width: 340px; max-width: 100%; }
+  .summary { display: flex; flex-wrap: wrap; gap: 6px 28px; margin: 14px 0 4px; align-items: baseline; }
+  .summary .id { font-size: 20px; font-weight: 600; }
+  .summary .kv span:first-child { color: var(--muted); font-size: 12px; margin-right: 6px; }
+  .summary .kv span:last-child { font-weight: 600; }
+  .legend { display: flex; flex-wrap: wrap; gap: 4px 14px; margin: 8px 0 10px; font-size: 12px; }
+  .legend .item { display: flex; align-items: center; gap: 5px; }
+  .legend .dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
+  .legend .zero { color: #aaa; }
+  /* every plot is a square of the same size (--panel, set by the "Plot size" control) */
+  .panels { display: grid; grid-template-columns: repeat(auto-fill, var(--panel)); gap: 12px; }
+  .panel { min-width: 0; }
+  .panel .title { font-weight: 600; }
+  .panel .title { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .panel .sub { font-size: 12px; color: var(--muted); height: 17px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .panel .sub.sig { color: var(--ink); }
+  .panel canvas { width: 100%; aspect-ratio: 1 / 1; display: block; border: 1px solid var(--line); margin-top: 4px; }
+  h2 { font-size: 14px; font-weight: 600; margin: 22px 0 6px; }
+  .scroll { overflow-x: auto; }
+  table { border-collapse: collapse; font-size: 13px; }
+  th, td { text-align: left; padding: 4px 14px 4px 0; border-bottom: 1px solid #ececec; white-space: nowrap; }
+  th { color: var(--muted); font-weight: 500; font-size: 12px; }
+  td.wrap { white-space: normal; word-break: break-all; max-width: 720px; }
+  .tilinfo { font-size: 13px; margin: 6px 0 10px; max-width: 1000px; }
+  .tilinfo span.k { color: var(--muted); font-size: 12px; margin-right: 6px; }
+  .tilinfo code { font: 12px ui-monospace, Menlo, Consolas, monospace; word-break: break-all; }
+  .ramp { display: inline-block; width: 90px; height: 9px; vertical-align: middle; margin: 0 5px;
+          background: linear-gradient(to right, #e5e5e5, #08306b); }
+  .panels5 { display: grid; grid-template-columns: repeat(5, var(--panel)); gap: 12px; }
+  .panels8 { display: grid; grid-template-columns: repeat(8, var(--panel)); gap: 12px; }
+  .rowlabel { font-size: 12px; color: var(--muted); margin: 14px 0 2px; }
+  .note { color: var(--muted); font-size: 12px; margin-top: 18px; max-width: 900px; }
+</style>
+</head>
+<body>
+<h1>Prioritized TCRs: clonotype cells on the UMAP of each condition</h1>
+
+<div class="controls">
+  <label>Patient <select id="patient"></select></label>
+  <label>Compartment <select id="compartment"></select></label>
+  <label>Prioritized clonotypes (table) <select id="clone"></select></label>
+  <button id="prev" title="Previous clonotype (left arrow)">&larr;</button>
+  <button id="next" title="Next clonotype (right arrow)">&rarr;</button>
+  <label id="searchLabel">Filter TIL clonotypes
+    <input id="search" type="search" placeholder="type a number or name" size="20">
+  </label>
+  <label id="foundLabel">TIL clonotypes <select id="found"></select></label>
+  <label>Clonotype point size
+    <select id="psize"><option value="1.5">Small</option><option value="2.5" selected>Medium</option><option value="4">Large</option></select>
+  </label>
+  <label>Other cells: point size
+    <select id="gsize"><option value="0">Hidden</option><option value="0.6">Very small</option><option value="1" selected>Small</option><option value="1.5">Medium</option><option value="2.5">Large</option></select>
+  </label>
+  <label>Other cells: grey
+    <select id="gshade"><option value="#ececec">Very light</option><option value="#dcdcdc" selected>Light</option><option value="#c4c4c4">Medium</option><option value="#9e9e9e">Dark</option></select>
+  </label>
+  <label>Plot size
+    <select id="plotsize"><option value="150">Small</option><option value="190" selected>Medium</option><option value="240">Large</option><option value="320">Very large</option></select>
+  </label>
+  <label id="tilScopeLabel">TIL marker panels
+    <select id="tilScope"><option value="all" selected>All patients</option><option value="patient">This patient only</option></select>
+  </label>
+</div>
+
+<div class="summary" id="summary"></div>
+<div class="legend" id="legend"></div>
+<div class="panels" id="panels"></div>
+
+<h2>Activation by condition</h2>
+<div class="scroll"><table id="condTable"></table></div>
+
+<div id="tilBlock" hidden>
+  <h2>TILs: single-cell data of the tumour-infiltrating lymphocytes (all patients)</h2>
+  <div class="scroll"><table id="tilTable"></table></div>
+  <div class="tilinfo" id="tilInfo"></div>
+  <div class="legend" id="tilLegend"></div>
+  <div class="scroll"><div class="panels5" id="tilPanels"></div></div>
+  <div class="legend" id="tilPatientLegend"></div>
+  <div class="rowlabel" id="tilProteinLabel"></div>
+  <div class="scroll"><div class="panels8" id="tilProtein"></div></div>
+  <div class="rowlabel" id="tilRnaLabel"></div>
+  <div class="scroll"><div class="panels8" id="tilRna"></div></div>
+</div>
+
+<h2>Frequency in deep TCR&beta;-seq repertoires</h2>
+<div class="scroll"><table id="bulkTable"></table></div>
+
+<h2 id="otherTitle">Clonotype definition</h2>
+<div class="scroll"><table id="otherTable"></table></div>
+
+<p class="note" id="note"></p>
+
+<script id="viewer-data" type="application/json">/*__DATA__*/</script>
+<script>
+"use strict";
+const DATA = JSON.parse(document.getElementById("viewer-data").textContent);
+const Q = DATA.quant;                       // UMAP coordinates are stored as integers in 0..Q
+const $ = id => document.getElementById(id);
+const el = (tag, cls, text) => { const e = document.createElement(tag); if (cls) e.className = cls;
+                                 if (text !== undefined) e.textContent = text; return e; };
+const isNA = v => v === null || v === undefined || v === "" || v === "NA";
+const show = v => isNA(v) ? "–" : String(v);
+
+const TIL_TIER = "TIL clonotype";   // rows added by the viewer: TIL clonotypes that are not in the prioritization table
+let current = null;     // row of the clonotype on display
+let ds = null;          // current dataset
+let visibleTable = [], visibleTil = [];   // rows listed in each dropdown
+let active = "table";                     // dropdown the arrows move through
+const bgCache = new Map();
+
+// ---- dataset helpers -------------------------------------------------------
+function prepare(d) {
+  if (d.ready) return;
+  d.col = {}; d.table.columns.forEach((c, i) => d.col[c] = i);
+  d.byCond = d.conditions.map(() => []);
+  for (let i = 0; i < d.cond.length; i++) d.byCond[d.cond[i]].push(i);
+  d.byClone = d.table.rows.map(() => []);
+  for (let i = 0; i < d.clone.length; i++) if (d.clone[i] >= 0) d.byClone[d.clone[i]].push(i);
+  d.ready = true;
+}
+const cell = (d, r, name) => d.col[name] === undefined ? null : d.table.rows[r][d.col[name]];
+
+function fillSelect(sel, values, labels) {
+  sel.innerHTML = "";
+  values.forEach((v, i) => { const o = el("option", null, labels ? labels[i] : v); o.value = v; sel.appendChild(o); });
+}
+
+function groupLabel(d, r) {
+  const tier = show(cell(d, r, "Tier")), level = cell(d, r, "Level");
+  if (!isNA(level)) return tier + " – " + level;
+  return tier + " – not prioritized";
+}
+
+const tilCount = (d, r) => { const v = cell(d, r, "TIL_sc"); return isNA(v) ? 0 : Number(String(v).replace(/\/.*$/, "")); };
+function optionLabel(d, r) {
+  const cond = cell(d, r, "Condition"), til = cell(d, r, "TIL_sc");
+  return d.table.rows[r][0] + (isNA(cond) ? "" : "  ·  " + cond) + "  ·  " + d.byClone[r].length + " cells ex vivo" +
+         (isNA(til) ? "" : "  ·  " + tilCount(d, r) + " in TILs");
+}
+// fills a dropdown with rows, grouped; returns nothing
+function fillOptions(sel, rows, groupOf) {
+  let group = null, groupName = null;
+  rows.forEach(r => {
+    const g = groupOf(r);
+    if (g !== groupName) { group = document.createElement("optgroup"); group.label = g; sel.appendChild(group); groupName = g; }
+    const o = el("option", null, optionLabel(ds, r)); o.value = String(r); group.appendChild(o);
+  });
+}
+// first dropdown: the clonotypes of the prioritization table, by Tier and Level
+function fillClones() {
+  const d = ds, sel = $("clone");
+  sel.innerHTML = "";
+  visibleTable = d.table.rows.map((_, r) => r).filter(r => cell(d, r, "Tier") !== TIL_TIER);
+  fillOptions(sel, visibleTable, r => groupLabel(d, r));
+  sel.value = visibleTable.includes(current) ? String(current) : "";
+}
+// second dropdown: every clonotype of the patient found in the TILs. Without text in the filter box, those with
+// enough TIL cells; with text, every TIL clonotype whose number or name matches (exact matches first)
+function fillTil(selectFirst) {
+  const d = ds, q = $("search").value.trim().toLowerCase(), sel = $("found");
+  sel.innerHTML = "";
+  const digits = /^\d+$/.test(q), hits = [];
+  d.table.rows.forEach((row, r) => {
+    const n = tilCount(d, r);
+    if (n < 1) return;
+    const inTable = cell(d, r, "Tier") !== TIL_TIER;
+    let score = 0;
+    if (q) {
+      const names = [row[0], cell(d, r, "TIL_sc_clonotype")].filter(x => !isNA(x)).map(x => String(x).toLowerCase());
+      if (names.some(x => x === q || (digits && x.replace(/^.*?(\d+)$/, "$1") === q))) score = 0;
+      else if (names.some(x => x.includes(q))) score = 1;
+      else return;
+    } else if (n < DATA.til_min_cells) return;
+    hits.push({ r, n, score, group: inTable ? "In the prioritization table" : show(cell(d, r, "Condition")), order: inTable ? 0 : 1 });
+  });
+  // groups in a fixed order (table first, then as stored); inside a group, exact matches and then most TIL cells first
+  const groupRank = {}; hits.forEach(h => { if (!(h.group in groupRank)) groupRank[h.group] = h.r; });   // rows are stored group by group
+  hits.sort((a, b) => a.order - b.order || groupRank[a.group] - groupRank[b.group] || a.score - b.score || b.n - a.n || a.r - b.r);
+  visibleTil = hits.map(h => h.r);
+  const head = el("option", null, hits.length ? "— " + hits.length + " TIL clonotype" + (hits.length > 1 ? "s" : "") +
+                  (q ? " matching \"" + q + "\"" : " with ≥ " + DATA.til_min_cells + " cells") + " —"
+                                  : "no TIL clonotype matches \"" + q + "\"");
+  head.value = ""; sel.appendChild(head);
+  const groupOf = {}; hits.forEach(h => groupOf[h.r] = h.group);
+  fillOptions(sel, visibleTil, r => groupOf[r]);
+  if (selectFirst && q && hits.length) {            // typing jumps to the best match
+    const best = hits.slice().sort((a, b) => a.score - b.score || b.n - a.n)[0].r;
+    current = best; active = "til";
+  }
+  sel.value = visibleTil.includes(current) && active === "til" ? String(current) : "";
+}
+
+// ---- drawing ---------------------------------------------------------------
+function background(d, c, px) {
+  const size = Number($("gsize").value), shade = $("gshade").value;
+  const key = [d.patient, d.compartment, c, px, size, shade].join("|");
+  if (bgCache.has(key)) return bgCache.get(key);
+  const cv = document.createElement("canvas"); cv.width = cv.height = px;
+  const g = cv.getContext("2d"), pad = px * 0.04, s = (px - 2 * pad) / Q, rad = size * px / 330;
+  g.fillStyle = "#ffffff"; g.fillRect(0, 0, px, px);
+  // all the other cells of this condition: opaque grey points, with their own size and shade
+  g.fillStyle = shade;
+  if (size > 0) for (const i of d.byCond[c]) {
+    g.beginPath(); g.arc(pad + d.x[i] * s, px - pad - d.y[i] * s, rad, 0, 2 * Math.PI); g.fill();
+  }
+  bgCache.set(key, cv); return cv;
+}
+
+function drawPanel(cv, d, c, r) {
+  const px = Math.round(cv.clientWidth * (window.devicePixelRatio || 1));
+  if (!px) return;
+  cv.width = cv.height = px;
+  const g = cv.getContext("2d"), pad = px * 0.04, s = (px - 2 * pad) / Q;
+  g.drawImage(background(d, c, px), 0, 0);
+  const rad = Number($("psize").value) * px / 330;
+  for (const i of d.byClone[r]) {
+    if (d.cond[i] !== c) continue;
+    g.beginPath(); g.arc(pad + d.x[i] * s, px - pad - d.y[i] * s, rad, 0, 2 * Math.PI);
+    g.fillStyle = d.colors[d.clus[i]]; g.fill();
+  }
+}
+
+// ---- TIL single-cell block --------------------------------------------------
+const TIL = DATA.til && Array.isArray(DATA.til.x) ? DATA.til : null;
+const TIL_FRACTIONS = [["TIL_sc", "All TIL cells with a TCR"], ["TIL_sc_PD1p", "PD-1 positive sorted fraction (PD1p)"], ["TIL_sc_PD1d", "PD-1 dim sorted fraction (PD1d)"]];
+const tilCache = new Map();
+if (TIL) TIL.markers.forEach(m => { m.order = Array.from(m.v.keys()).sort((a, b) => m.v[a] - m.v[b]); });
+
+// "53 of 1196" from the "<name>_rank (N=1196)" column
+function tilRank(d, r, name) {
+  const col = d.table.columns.find(c => c.startsWith(name + "_rank (N="));
+  if (!col || isNA(cell(d, r, col))) return null;
+  return cell(d, r, col) + " of " + col.replace(/^.*N=(\d+).*$/, "$1");
+}
+function ramp(v) {                                      // 0..255 -> light grey to dark blue
+  const a = [229, 229, 229], b = [8, 48, 107], f = v / 255;
+  return "rgb(" + a.map((x, i) => Math.round(x + (b[i] - x) * f)).join(",") + ")";
+}
+// static layer of a TIL panel (everything except the cells of the selected clonotype).
+// kinds: cluster_all, patient_all, cluster_pt, grey_all, grey_pt, or the index of a marker.
+// Point size and grey shade follow the "Other cells" controls, as in the panels of the conditions.
+function tilLayer(kind, px, patientIndex) {
+  const marker = typeof kind === "number";
+  const onlyPatient = kind === "cluster_pt" || kind === "grey_pt" || (marker && $("tilScope").value === "patient");
+  const grey = kind === "grey_all" || kind === "grey_pt";
+  const chosen = Number($("gsize").value), shade = $("gshade").value;
+  const size = chosen > 0 ? chosen : (grey ? 0 : 1);     // "Hidden" only hides the grey cells
+  const key = [kind, px, onlyPatient ? patientIndex : "", size, grey ? shade : ""].join("|");
+  if (tilCache.has(key)) return tilCache.get(key);
+  const cv = document.createElement("canvas"); cv.width = cv.height = px;
+  const g = cv.getContext("2d"), pad = px * 0.04, s = (px - 2 * pad) / Q, rad = size * px / 330, n = TIL.x.length;
+  const put = rad < 1.3                                  // tiny points as squares (much faster), larger ones as circles
+    ? i => g.fillRect(pad + TIL.x[i] * s - rad, px - pad - TIL.y[i] * s - rad, 2 * rad, 2 * rad)
+    : i => { g.beginPath(); g.arc(pad + TIL.x[i] * s, px - pad - TIL.y[i] * s, rad, 0, 2 * Math.PI); g.fill(); };
+  g.fillStyle = "#ffffff"; g.fillRect(0, 0, px, px);
+  if (size > 0 && marker) {                              // highest values drawn last
+    const m = TIL.markers[kind], shades = Array.from({ length: 256 }, (_, v) => ramp(v));
+    for (const i of m.order) { if (onlyPatient && TIL.patient[i] !== patientIndex) continue; g.fillStyle = shades[m.v[i]]; put(i); }
+  } else if (size > 0) {
+    for (let i = 0; i < n; i++) {
+      if (onlyPatient && TIL.patient[i] !== patientIndex) continue;
+      g.fillStyle = kind === "patient_all" ? TIL.patient_colors[TIL.patient[i]] : kind.startsWith("cluster") ? TIL.colors[TIL.clus[i]] : shade;
+      put(i);
+    }
+  }
+  tilCache.set(key, cv); return cv;
+}
+// cells of the clonotype: coloured by their TIL cluster, as in the panels of the conditions
+function drawTilPanel(cv, kind, cells, patientIndex, overlay) {
+  const px = Math.round(cv.clientWidth * (window.devicePixelRatio || 1));
+  if (!px) return;
+  cv.width = cv.height = px;
+  const g = cv.getContext("2d"), pad = px * 0.04, s = (px - 2 * pad) / Q;
+  g.drawImage(tilLayer(kind, px, patientIndex), 0, 0);
+  if (!overlay) return;
+  const rad = Number($("psize").value) * px / 330, outline = typeof kind === "number";
+  for (const i of cells) {
+    g.beginPath(); g.arc(pad + TIL.x[i] * s, px - pad - TIL.y[i] * s, rad, 0, 2 * Math.PI);
+    g.fillStyle = TIL.colors[TIL.clus[i]]; g.fill();
+    if (outline) { g.lineWidth = Math.max(1, px / 260); g.strokeStyle = "#ffffff"; g.stroke(); }   // visible on the marker colours
+  }
+}
+// returns true when the TIL block is shown
+function renderTIL(d, r) {
+  const block = $("tilBlock");
+  if (!TIL || !Array.isArray(d.til_cells)) { block.hidden = true; return false; }
+  block.hidden = false;
+  const cells = d.til_cells[r] || [], id = d.table.rows[r][0];
+  const tilPatient = "CHUM_" + d.patient.replace(/^pt/, ""), patientIndex = TIL.patients.indexOf(tilPatient);
+  const nPatient = TIL.patient.reduce((a, p) => a + (p === patientIndex ? 1 : 0), 0);
+
+  // frequency and rank, overall and per sorted fraction
+  const tt = $("tilTable"); tt.innerHTML = "";
+  const head = el("tr"); ["TIL cells of " + tilPatient, "Cells of the clonotype / cells with a TCR", "Rank among TIL clonotypes"].forEach(h => head.appendChild(el("th", null, h)));
+  tt.appendChild(head);
+  TIL_FRACTIONS.forEach(([name, label]) => {
+    const tr = el("tr"); tr.appendChild(el("td", null, label));
+    tr.appendChild(el("td", null, show(cell(d, r, name)))); tr.appendChild(el("td", null, show(tilRank(d, r, name)))); tt.appendChild(tr);
+  });
+
+  // how the clonotype was matched to the TIL cells
+  const info = $("tilInfo"); info.innerHTML = "";
+  info.appendChild(el("span", "k", "Matched by")); info.appendChild(el("span", null, show(cell(d, r, "TIL_sc_matched_by"))));
+  if (!isNA(cell(d, r, "TIL_sc_clonotype"))) {
+    info.appendChild(el("span", "k", "   \u00b7   TIL clonotype")); info.appendChild(el("span", null, cell(d, r, "TIL_sc_clonotype")));
+  }
+  if (!isNA(cell(d, r, "TIL_sc_match_key"))) {
+    info.appendChild(el("span", "k", "   ·   key")); info.appendChild(el("code", null, cell(d, r, "TIL_sc_match_key")));
+  }
+
+  // legends: TIL clusters (with the cells of this clonotype in each) and patients
+  const item = (parent, color, text, zero) => { const it = el("span", "item" + (zero ? " zero" : "")); const dot = el("span", "dot"); dot.style.background = color; it.appendChild(dot); it.appendChild(el("span", null, text)); parent.appendChild(it); };
+  const perCluster = TIL.clusters.map(() => 0); for (const i of cells) perCluster[TIL.clus[i]]++;
+  const leg = $("tilLegend"); leg.innerHTML = "";
+  leg.appendChild(el("span", null, "TIL cluster (cells of this clonotype):"));
+  TIL.clusters.forEach((name, k) => item(leg, TIL.colors[k], name + " (" + perCluster[k] + ")", !perCluster[k]));
+  const pleg = $("tilPatientLegend"); pleg.innerHTML = "";
+  pleg.appendChild(el("span", null, "Patient:"));
+  TIL.patients.forEach((name, k) => item(pleg, TIL.patient_colors[k], name + (k === patientIndex ? " (this patient)" : "")));
+  const scale = el("span", "item"); scale.appendChild(el("span", null, "   Marker level: low")); scale.appendChild(el("span", "ramp")); scale.appendChild(el("span", null, "high")); pleg.appendChild(scale);
+
+  // row 1: reference maps and position of the clonotype; rows 2-3: protein and RNA markers
+  const total = TIL.x.length.toLocaleString("en-US"), inPatient = nPatient.toLocaleString("en-US");
+  const fill = (parent, specs) => {
+    parent.innerHTML = ""; const todo = [];
+    specs.forEach(([kind, title, sub, overlay]) => {
+      const p = el("div", "panel"); p.title = title + " \u2013 " + sub;
+      p.appendChild(el("div", "title", title)); p.appendChild(el("div", "sub", sub));
+      const cv = document.createElement("canvas"); cv.setAttribute("role", "img");
+      cv.setAttribute("aria-label", "TIL UMAP, " + title + (overlay ? ": " + cells.length + " cells of " + id : ""));
+      p.appendChild(cv); parent.appendChild(p); todo.push([cv, kind, overlay]);
+    });
+    todo.forEach(([cv, kind, overlay]) => drawTilPanel(cv, kind, cells, patientIndex, overlay));
+  };
+  fill($("tilPanels"), [
+    ["cluster_all", "TIL clusters", "all patients · " + total + " cells", false],
+    ["patient_all", "Patients", "all patients · coloured by patient", false],
+    ["cluster_pt", "TIL clusters, " + tilPatient, "this patient only · " + inPatient + " cells", false],
+    ["grey_all", id + " in all the TILs", cells.length + " cells of the clonotype", true],
+    ["grey_pt", id + " in " + tilPatient, cells.length + " cells of the clonotype", true]
+  ]);
+  const markerRow = source => TIL.markers.map((m, k) => [k, m.label, m.group, true, m.source]).filter(x => x[4] === source);
+  const protein = markerRow("protein (ADT)"), rna = markerRow("RNA (SCT)");
+  const scope = $("tilScope").value === "patient" ? tilPatient + " only" : "all patients";
+  $("tilProteinLabel").textContent = protein.length ? "Protein (CITE-seq antibodies, ADT assay) \u00b7 " + scope + ", cells of the clonotype on top" : "";
+  $("tilRnaLabel").textContent = rna.length ? "Gene expression (RNA, SCT assay) \u00b7 " + scope + ", cells of the clonotype on top" : "";
+  fill($("tilProtein"), protein); fill($("tilRna"), rna);
+  return true;
+}
+
+function render() {
+  const d = ds, r = current;
+  if (!d || r === null || r === undefined) return;
+  const id = d.table.rows[r][0];
+
+  // summary line
+  const sum = $("summary"); sum.innerHTML = "";
+  sum.appendChild(el("div", "id", id));
+  const kv = (k, v) => { const w = el("div", "kv"); w.appendChild(el("span", null, k)); w.appendChild(el("span", null, show(v))); sum.appendChild(w); };
+  kv("Tier", cell(d, r, "Tier")); kv("Level", cell(d, r, "Level"));
+  kv("Prioritize", cell(d, r, "Prioritize")); kv("Responding condition", cell(d, r, "Condition"));
+  if (d.col["chains"] !== undefined) kv("Chains", cell(d, r, "chains"));
+  if (d.col["TIL_sc"] !== undefined) {
+    kv("TIL single-cell frequency", cell(d, r, "TIL_sc"));
+    kv("TIL single-cell rank", tilRank(d, r, "TIL_sc"));
+  }
+
+  // legend: clusters, with the number of cells of this clonotype in each
+  const counts = d.clusters.map(() => 0);
+  for (const i of d.byClone[r]) counts[d.clus[i]]++;
+  const leg = $("legend"); leg.innerHTML = "";
+  leg.appendChild(el("span", null, "Cluster (cells of this clonotype):"));
+  d.clusters.forEach((name, k) => {
+    const it = el("span", "item" + (counts[k] ? "" : " zero"));
+    const dot = el("span", "dot"); dot.style.background = d.colors[k]; it.appendChild(dot);
+    it.appendChild(el("span", null, name + " (" + counts[k] + ")")); leg.appendChild(it);
+  });
+
+  // one UMAP per condition
+  const panels = $("panels"); panels.innerHTML = "";
+  const canvases = [];
+  d.conditions.forEach((cond, c) => {
+    const n = d.byClone[r].reduce((a, i) => a + (d.cond[i] === c ? 1 : 0), 0);
+    const p = el("div", "panel");
+    p.appendChild(el("div", "title", cond));
+    const act = cell(d, r, cond), padj = cell(d, r, cond + "_padj");
+    const sub = el("div", "sub", isNA(act) ? n + " cells" : "activated " + act + (isNA(padj) ? "" : "  ·  padj " + padj));
+    const resp = cell(d, r, "Condition");
+    if (!isNA(resp) && String(resp).split(" + ").includes(cond)) sub.classList.add("sig");
+    p.appendChild(sub); p.title = cond + " \u2013 " + sub.textContent;
+    const cv = document.createElement("canvas");
+    cv.setAttribute("role", "img"); cv.setAttribute("aria-label", "UMAP, " + cond + ": " + n + " cells of " + id);
+    p.appendChild(cv); panels.appendChild(p); canvases.push([cv, c]);
+  });
+  canvases.forEach(([cv, c]) => drawPanel(cv, d, c, r));
+
+  // per-condition table
+  const ct = $("condTable"); ct.innerHTML = "";
+  const head = el("tr"); ["Condition", "Activated / total", "padj", "Main cluster", "Main phenotype"].forEach(h => head.appendChild(el("th", null, h)));
+  ct.appendChild(head);
+  const used = new Set([d.table.columns[0], "Prioritize", "Tier", "Level", "Condition", "chains"]);
+  if (renderTIL(d, r)) d.table.columns.forEach(c => { if (c.startsWith("TIL_sc")) used.add(c); });
+  d.conditions.forEach(cond => {
+    const tr = el("tr"); tr.appendChild(el("td", null, cond));
+    ["", "_padj", "_cluster", "_phenotype"].forEach(suf => { tr.appendChild(el("td", null, show(cell(d, r, cond + suf)))); used.add(cond + suf); });
+    ct.appendChild(tr);
+  });
+
+  // deep TCRb-seq repertoires: one row per repertoire, from the "<name>_freq" and "<name>_rank (N=...)" columns
+  const bt = $("bulkTable"); bt.innerHTML = "";
+  const bhead = el("tr"); ["Repertoire", "Frequency (productive clonotypes)", "Rank"].forEach(h => bhead.appendChild(el("th", null, h)));
+  bt.appendChild(bhead);
+  d.table.columns.filter(c => c.endsWith("_freq")).forEach(col => {
+    const name = col.replace(/_freq$/, ""), rankCol = d.table.columns.find(c => c.startsWith(name + "_rank (N="));
+    const tr = el("tr"); tr.appendChild(el("td", null, name)); tr.appendChild(el("td", null, show(cell(d, r, col))));
+    tr.appendChild(el("td", null, !rankCol ? "–" : isNA(cell(d, r, rankCol)) ? "– of " + rankCol.replace(/^.*N=(\d+).*$/, "$1") : cell(d, r, rankCol) + " of " + rankCol.replace(/^.*N=(\d+).*$/, "$1")));
+    bt.appendChild(tr); used.add(col); if (rankCol) used.add(rankCol);
+  });
+
+  // what is left: definition of the clonotype (V/J genes and CDR3 of each chain)
+  const ot = $("otherTable"); ot.innerHTML = "";
+  d.table.columns.forEach((name, j) => {
+    if (used.has(name)) return;
+    const tr = el("tr"); tr.appendChild(el("th", null, name));
+    tr.appendChild(el("td", "wrap", show(d.table.rows[r][j]))); ot.appendChild(tr);
+  });
+  $("otherTitle").hidden = ot.children.length === 0;
+
+  $("note").textContent = "Generated by Endika Prieto (endikaprieto@vhio.net) · " + DATA.generated;
+}
+
+// ---- controls --------------------------------------------------------------
+function show1(r, list) {                       // display row r, chosen in dropdown "table" or "til"
+  current = r; active = list;
+  $("clone").value = list === "table" ? String(r) : "";
+  $("found").value = list === "til" ? String(r) : "";
+  render();
+}
+function setDataset() {
+  ds = DATA.datasets.find(d => d.patient === $("patient").value && d.compartment === $("compartment").value);
+  prepare(ds); fillClones();
+  current = visibleTable.length ? visibleTable[0] : null; active = "table";
+  $("clone").value = current === null ? "" : String(current);
+  fillTil(true); render();
+}
+function setPatient() {
+  const comps = DATA.datasets.filter(d => d.patient === $("patient").value).map(d => d.compartment);
+  fillSelect($("compartment"), comps, comps.map(c => c.toUpperCase()));
+  setDataset();
+}
+function step(k) {
+  const list = active === "til" ? visibleTil : visibleTable;
+  const pos = list.indexOf(current), next = pos < 0 ? 0 : pos + k;
+  if (next < 0 || next >= list.length) return;
+  show1(list[next], active);
+}
+
+fillSelect($("patient"), [...new Set(DATA.datasets.map(d => d.patient))]);
+$("patient").addEventListener("change", setPatient);
+$("compartment").addEventListener("change", setDataset);
+$("clone").addEventListener("change", () => { if ($("clone").value !== "") show1(Number($("clone").value), "table"); });
+$("found").addEventListener("change", () => { if ($("found").value !== "") show1(Number($("found").value), "til"); });
+$("search").addEventListener("input", () => { fillTil(true); if (active === "til") $("clone").value = ""; render(); });
+$("psize").addEventListener("change", render);
+$("gsize").addEventListener("change", render);
+$("gshade").addEventListener("change", render);
+$("tilScope").addEventListener("change", render);
+if (!TIL) { $("tilScopeLabel").hidden = true; $("searchLabel").hidden = true; $("foundLabel").hidden = true; }
+const setPlotSize = () => { document.documentElement.style.setProperty("--panel", $("plotsize").value + "px"); bgCache.clear(); tilCache.clear(); };
+$("plotsize").addEventListener("change", () => { setPlotSize(); render(); });
+setPlotSize();
+$("prev").addEventListener("click", () => step(-1));
+$("next").addEventListener("click", () => step(1));
+document.addEventListener("keydown", e => {
+  if (e.target.tagName === "SELECT" || e.target.tagName === "INPUT") return;
+  if (e.key === "ArrowLeft") step(-1); else if (e.key === "ArrowRight") step(1);
+});
+let resizeTimer = null;
+window.addEventListener("resize", () => { clearTimeout(resizeTimer); resizeTimer = setTimeout(() => { bgCache.clear(); tilCache.clear(); render(); }, 150); });
+setPatient();
+</script>
+</body>
+</html>

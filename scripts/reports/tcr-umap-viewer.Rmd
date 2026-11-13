@@ -1,0 +1,491 @@
+---
+title: "Interactive UMAP viewer of prioritized TCR clonotypes"
+author: "Endika Prieto <endikaprieto@vhio.net>"
+date: "2026-11-13"
+---
+
+# setup
+
+Builds one self-contained HTML file (no server, no internet needed) to browse the prioritized TCRs of every patient:
+choose patient, compartment and clonotype, and the cells of that clonotype are highlighted on the UMAP of each
+condition, coloured by Seurat cluster, as in the static `IC11_*_prioritized_TCRs` figures. Tier, Level and the rest
+of the prioritization table are shown next to the plots.
+
+Inputs, per patient and compartment (both written by `deconv-analysis*.Rmd`):
+
+- `patients/<patient>/deconv/tcr/prioritized_<compartment>_tcrs_for_validation.tsv`
+- `patients/<patient>/deconv/seurat/obj_<compartment>_TCR.rds`
+
+A second block shows the single-cell data of the TILs (`til-data/`, all patients): the cells carrying the selected
+clonotype on the TIL UMAP, next to the TIL clusters, the patients and two rows of lineage, exhaustion and memory markers
+(protein and RNA). It needs the `TIL_sc_*` columns written by `til-frequency.Rmd`, so run that script first.
+
+Output: `patients/prioritized_tcrs_umap_viewer.html`
+
+The Seurat objects are large (up to ~2.6 GB on disk): run this on a compute node, not on the front end.
+
+```{r, warning=FALSE, message=FALSE}
+# --- Define paths ---
+# R is started in renv-sturcotte/ (scripts/interactive-R.sh), so ".." is the project folder
+project_dir <- normalizePath("..", mustWork = TRUE)
+datapath <- file.path(project_dir, "patients")
+folder_data <- "deconv"
+template_file <- file.path(project_dir, "scripts", "reports", "tcr-umap-viewer-template.html")
+output_file <- file.path(datapath, "prioritized_tcrs_umap_viewer.html")
+# --- Parameters ---
+patients_sel <- NULL                  # NULL = every patient with a prioritization table; or e.g. c("pt3385", "pt3513")
+cluster_column <- "SCT_snn_res.0.5"   # clustering used to colour the cells (same as the IC11 figures)
+reduction <- "umap"
+coord_quant <- 4095L                  # UMAP coordinates are stored as integers in 0..coord_quant to keep the file small
+# --- TIL single-cell data (set til_file <- NULL to leave the TIL block out) ---
+til_file <- file.path(project_dir, "til-data", "cite1_2_3_4_5_6_8_withoutPat400304_TCR_ADT_virus_singlets.rds")
+til_reduction <- "umap.cca"
+til_min_cells <- 2    # TIL clonotypes with at least this many cells are listed in the dropdown (all are searchable)
+bulk_file <- file.path(datapath, "clonotypes_adaptive_bulk_productivefreqs_update.rds")   # same file as in petasan .../sturcotte/tcrb/
+phenotype_column <- "functional.cluster"   # ProjecTILs annotation used in the <condition>_phenotype columns
+til_cluster_column <- "clusters_old"
+# Markers painted on the TIL UMAP: one row of proteins (ADT assay, CITE-seq antibodies) and one row of genes
+# (SCT assay), shown in this order; the first four are the same markers in both rows
+til_markers <- data.frame(
+  label = c("CD4", "CD8", "PD-1 (CD279)", "CD39", "TIM-3 (CD366)", "4-1BB (CD137)", "CD103", "CD127 (IL-7Ra)",
+            "CD4", "CD8A", "PDCD1 (PD-1)", "ENTPD1 (CD39)", "CXCL13", "TOX", "TCF7", "GZMK"),
+  group = c("lineage", "lineage", "exhaustion", "exhaustion", "exhaustion", "activation / tumour reactivity", "tissue residency", "memory",
+            "lineage", "lineage", "exhaustion", "exhaustion", "exhaustion / tumour reactivity", "exhaustion", "stem-like / pre-exhausted", "pre-exhausted / effector memory"),
+  assay = c(rep("ADT", 8), rep("SCT", 8)),
+  feature = c("anti-human-CD4", "anti-human-CD8", "anti-human-CD279", "anti-human-CD39",
+              "TotalSeq-C0169 anti-human CD366 (Tim-3) Antibody", "anti-human-CD137-4-1BB",
+              "anti-human-CD103-Integrin-aE", "anti-human-CD127-IL-7Ra",
+              "CD4", "CD8A", "PDCD1", "ENTPD1", "CXCL13", "TOX", "TCF7", "GZMK")
+)
+# --- Load libraries ---
+library(SeuratObject)
+library(jsonlite)
+library(scales)
+```
+
+# inputs
+
+One row per prioritization table found.
+
+```{r}
+tables <- list.files(
+  datapath,
+  pattern = "^prioritized_.*_tcrs_for_validation\\.tsv$",
+  recursive = TRUE,
+  full.names = TRUE
+)
+tables <- tables[basename(dirname(tables)) == "tcr" & basename(dirname(dirname(tables))) == folder_data]
+inputs <- data.frame(
+  patient = basename(dirname(dirname(dirname(tables)))),
+  compartment = sub("^prioritized_(.*)_tcrs_for_validation\\.tsv$", "\\1", basename(tables)),
+  table = tables
+)
+inputs$seurat <- file.path(datapath, inputs$patient, folder_data, "seurat", paste0("obj_", inputs$compartment, "_TCR.rds"))
+if (!is.null(patients_sel)) {
+  inputs <- inputs[inputs$patient %in% patients_sel, , drop = FALSE]
+}
+missing_objects <- !file.exists(inputs$seurat)
+if (any(missing_objects)) {
+  warning("Seurat object not found, skipped: ", paste(inputs$seurat[missing_objects], collapse = ", "))
+  inputs <- inputs[!missing_objects, , drop = FALSE]
+}
+stopifnot(nrow(inputs) > 0)
+inputs[, c("patient", "compartment")]
+```
+
+# tils
+
+UMAP coordinates, patient, sorted fraction, cluster, TCR keys and marker levels of every cell of the TIL object.
+Marker levels are the normalized values of the assay, rescaled to 0-255 between the 1st and the 99th percentile
+of all cells (RNA: between 0 and the 99th percentile).
+
+```{r}
+# --- Rescale a coordinate to integers in 0..coord_quant ---
+quantize <- function(v) {
+  rng <- range(v)
+  as.integer(round((v - rng[1]) / (rng[2] - rng[1]) * coord_quant))
+}
+til <- NULL
+til_md <- NULL
+if (!is.null(til_file)) {
+  obj <- readRDS(til_file)
+  til_md <- obj[[]]
+  stopifnot(all(c("patient_id", "subset_id", "clonotype", "cdr3_j", til_cluster_column) %in% colnames(til_md)))
+  emb <- SeuratObject::Embeddings(obj, reduction = til_reduction)[rownames(til_md), 1:2]
+  markers <- lapply(seq_len(nrow(til_markers)), function(i) {
+    values <- SeuratObject::LayerData(obj, assay = til_markers$assay[i], layer = "data")[til_markers$feature[i], rownames(til_md)]
+    low <- if (til_markers$assay[i] == "ADT") stats::quantile(values, 0.01) else 0
+    high <- stats::quantile(values, 0.99)
+    if (high <= low) high <- max(values)
+    list(
+      label = til_markers$label[i],
+      group = til_markers$group[i],
+      source = if (til_markers$assay[i] == "ADT") "protein (ADT)" else "RNA (SCT)",
+      feature = til_markers$feature[i],
+      v = as.integer(round(255 * pmin(pmax((values - low) / (high - low), 0), 1)))
+    )
+  })
+  rm(obj)
+  invisible(gc())
+  til_patients <- sort(unique(til_md$patient_id))
+  til_subsets <- c("PD1p", "PD1d")
+  til_clusters <- levels(factor(til_md[[til_cluster_column]]))
+  stopifnot(all(til_md$subset_id %in% til_subsets))
+  til <- list(
+    reduction = til_reduction,
+    cluster_column = til_cluster_column,
+    source = sub(paste0("^", project_dir, "/"), "", til_file),
+    patients = I(til_patients),
+    patient_colors = I(scales::hue_pal(l = 60, c = 110, h.start = 40)(length(til_patients))),
+    subsets = I(til_subsets),
+    clusters = I(til_clusters),
+    colors = I(scales::hue_pal()(length(til_clusters))),
+    x = quantize(emb[, 1]),
+    y = quantize(emb[, 2]),
+    patient = match(til_md$patient_id, til_patients) - 1L,
+    subset = match(til_md$subset_id, til_subsets) - 1L,
+    clus = match(as.character(til_md[[til_cluster_column]]), til_clusters) - 1L,
+    markers = markers
+  )
+  cat("TIL cells:", nrow(til_md), "| patients:", length(til_patients), "| markers:", paste(til_markers$label, collapse = ", "), "\n")
+}
+# --- TIL cells of each clonotype of a table (0-based indices), from the TIL_sc_* columns of til-frequency.Rmd ---
+til_cells_of <- function(patient, tcr_table) {
+  if (is.null(til_md) || !all(c("TIL_sc", "TIL_sc_matched_by", "TIL_sc_match_key") %in% colnames(tcr_table))) {
+    return(NULL)
+  }
+  in_patient <- til_md$patient_id == paste0("CHUM_", sub("^pt", "", patient))
+  cells <- lapply(seq_len(nrow(tcr_table)), function(i) {
+    key <- tcr_table$TIL_sc_match_key[i]
+    basis <- tcr_table$TIL_sc_matched_by[i]
+    if (is.na(key)) {
+      return(integer(0))
+    }
+    til_key <- if (startsWith(basis, "CDR3b")) til_md$cdr3_j else if (startsWith(basis, "clonotype ID")) til_md$clonotype else stop("Unknown match basis: ", basis)
+    which(in_patient & !is.na(til_key) & til_key == key) - 1L
+  })
+  # --- Internal control: same number of cells as in the table ---
+  expected <- suppressWarnings(as.integer(sub("/.*$", "", tcr_table$TIL_sc)))
+  stopifnot(identical(lengths(cells)[!is.na(expected)], expected[!is.na(expected)]), all(lengths(cells)[is.na(expected)] == 0))
+  lapply(cells, I)
+}
+```
+
+# til clonotypes
+
+Besides the clonotypes of the prioritization table, the viewer knows every TIL clonotype of the patient, to see
+whether it was found ex vivo and whether it is activated. They can be found with the search box (by clonotype
+number or name), and those with at least `til_min_cells` TIL cells are also listed in the dropdown, after the clonotypes of the table. They are
+labelled Tier "TIL clonotype" and, as responding condition, "Non prioritized" plus their status:
+
+- **no significant response ex vivo**: found ex vivo (same matching rule as `til-frequency.Rmd`: CDR3 beta
+  nucleotide sequence + TRBJ where the deconvolution object has sequences, clonotype identifier shared with the
+  bulk table otherwise). One entry per ex vivo clonotype not already in the table, with its activation in every
+  condition recomputed exactly as in `deconv-analysis.Rmd` (99th percentile of Unpulsed, one-sided binomial test,
+  BH within condition). They are not in the table because they have no significant response to Pept_pool or to
+  any R condition.
+- **not detected ex vivo**: entry named `TIL <clonotype>`, with TIL panels only.
+- **cannot be matched ex vivo** (objects without sequences, identifier absent from the bulk table): idem.
+
+These entries exist only in the viewer; the prioritization tables are not modified.
+
+```{r}
+bulk <- if (!is.null(til_file)) readRDS(bulk_file) else NULL
+# --- Most frequent beta-chain key (CDR3 nt + TRBJ) of each clonotype, as in til-frequency.Rmd ---
+beta_keys <- function(md, id_column) {
+  md <- md[!is.na(md[[id_column]]), c(id_column, "chains", "cdr3_nt", "j_gene")]
+  keys <- Map(
+    function(chain, nt, j) {
+      if (anyNA(c(chain, nt, j))) {
+        return(character(0))
+      }
+      chain <- trimws(strsplit(chain, ";", fixed = TRUE)[[1]])
+      nt <- trimws(strsplit(nt, ";", fixed = TRUE)[[1]])
+      j <- trimws(strsplit(j, ";", fixed = TRUE)[[1]])
+      if (length(chain) != length(nt) || length(nt) != length(j)) {
+        return(character(0))
+      }
+      beta_idx <- which(chain == "TRB" & grepl("^TRBJ", j) & grepl("^[ACGT]+$", nt))
+      paste0(nt[beta_idx], "_", sub("\\*.*$", "", j[beta_idx]))
+    },
+    md$chains, md$cdr3_nt, md$j_gene
+  )
+  long <- data.frame(
+    id = rep(as.character(md[[id_column]]), lengths(keys)),
+    cdr3_j = unlist(keys, use.names = FALSE)
+  )
+  counts <- stats::aggregate(Freq ~ id + cdr3_j, data = cbind(long, Freq = 1L), FUN = sum)
+  counts <- counts[order(counts$id, -counts$Freq, counts$cdr3_j), ]
+  counts <- counts[!duplicated(counts$id), ]
+  stats::setNames(counts$cdr3_j, counts$id)
+}
+decimal_comma <- function(x) sub(".", ",", as.character(x), fixed = TRUE)
+# --- Activation of every clonotype in every condition, as in deconv-analysis.Rmd ---
+condition_stats <- function(md, id_column, conditions) {
+  ids <- factor(as.character(md[[id_column]]))
+  sample <- factor(as.character(md$sample_id), levels = conditions)
+  threshold <- stats::quantile(md$activation_UCell[sample == "Unpulsed"], 0.99)
+  activated <- md$activation_UCell > threshold
+  p0 <- max(mean(activated[sample == "Unpulsed"]), 0.01)
+  n <- unclass(table(ids, sample))
+  act <- unclass(table(ids[activated], sample[activated]))
+  p <- stats::pbinom(act - 1, n, p0, lower.tail = FALSE)   # binom.test(act, n, p0, alternative = "greater")
+  p[n < 2] <- NA
+  padj <- apply(p, 2, stats::p.adjust, method = "BH")
+  activation <- ifelse(n > 0, sprintf("%d/%d (%.1f%%)", act, n, 100 * act / pmax(n, 1)), NA_character_)
+  dim(activation) <- dim(n)
+  padj_text <- decimal_comma(signif(padj, 2))
+  dim(padj_text) <- dim(n)
+  dimnames(activation) <- dimnames(padj_text) <- dimnames(n)
+  list(activation = activation, padj = padj_text)
+}
+# --- Most frequent state of a clonotype in a condition: "state (pct%)", "ND" without cells ---
+main_state <- function(states) {
+  if (length(states) == 0) {
+    return("ND")
+  }
+  counts <- table(trimws(as.character(states)))
+  counts <- counts[names(counts) != ""]
+  if (length(counts) == 0) {
+    return("Unannotated")
+  }
+  top <- sort(names(counts)[counts == max(counts)])
+  paste(sprintf("%s (%d%%)", top, round(100 * max(counts) / length(states))), collapse = " or ")
+}
+til_tier <- "TIL clonotype"
+til_groups <- c(
+  exvivo = "Non prioritized (no significant response ex vivo)",
+  absent = "Non prioritized (not detected ex vivo)",
+  unmatched = "Non prioritized (cannot be matched ex vivo)"
+)
+# --- Prioritization table plus one row per TIL clonotype that is not in it (same columns, as text) ---
+til_extended_table <- function(patient, compartment, tcr_table, md, conditions) {
+  if (is.null(til_md) || !all(c("TIL_sc", "TIL_sc_matched_by", "TIL_sc_match_key") %in% colnames(tcr_table))) {
+    return(tcr_table)
+  }
+  id_column <- colnames(tcr_table)[1]
+  til_patient <- paste0("CHUM_", sub("^pt", "", patient))
+  til_pt <- til_md[til_md$patient_id == til_patient & !is.na(til_md$clonotype) & !is.na(til_md$cdr3_j), ]
+  bulk_pt <- bulk[[til_patient]]
+  stopifnot(nrow(til_pt) > 0, !is.null(bulk_pt))
+  pairs <- unique(til_pt[, c("clonotype", "cdr3_j")])
+  stopifnot(!anyDuplicated(pairs$clonotype), !anyDuplicated(pairs$cdr3_j))
+  use_sequence <- all(c("chains", "cdr3_nt", "j_gene") %in% colnames(md))
+  til_key_column <- if (use_sequence) "cdr3_j" else "clonotype"
+  # --- Clonotype identifier in the TIL data of the clonotypes of the table (searchable in the viewer) ---
+  tcr_table$TIL_sc_clonotype <- if (use_sequence) {
+    pairs$clonotype[match(tcr_table$TIL_sc_match_key, pairs$cdr3_j)]
+  } else {
+    ifelse(tcr_table$TIL_sc_match_key %in% pairs$clonotype, tcr_table$TIL_sc_match_key, NA_character_)
+  }
+  exvivo_key <- if (use_sequence) beta_keys(md, id_column) else {
+    ids <- unique(as.character(md[[id_column]]))
+    stats::setNames(ifelse(ids %in% bulk_pt$clonotype, ids, NA_character_), ids)
+  }
+  # --- TIL counts and ranks, overall and per sorted fraction (as in til-frequency.Rmd) ---
+  til_counts <- lapply(c(TIL_sc = "all", TIL_sc_PD1p = "PD1p", TIL_sc_PD1d = "PD1d"), function(subset) {
+    cells <- if (subset == "all") rep(TRUE, nrow(til_pt)) else til_pt$subset_id == subset
+    counts <- table(til_pt[[til_key_column]][cells])
+    list(counts = counts, ranks = rank(-counts, ties.method = "min"), total = sum(cells))
+  })
+  for (column in names(til_counts)) {
+    stopifnot(paste0(column, "_rank (N=", length(til_counts[[column]]$counts), ")") %in% colnames(tcr_table))
+  }
+  # --- Bulk TCRb frequencies and ranks among productive clonotypes (as in deconv-analysis.Rmd) ---
+  bulk_columns <- c(Tumor = "tumor", Blood = "blood", PE = "PE", Bulk = "bulk", TIDAL01 = "TIDAL01")
+  bulk_columns <- bulk_columns[paste0(names(bulk_columns), "_freq") %in% colnames(tcr_table)]
+  bulk_productive <- unique(bulk_pt[bulk_pt$productive == "yes", c("clonotype", "cdr3_j", unname(bulk_columns))])
+  bulk_key <- bulk_productive[[til_key_column]]
+  bulk_distinct <- !duplicated(bulk_productive$clonotype)   # ranks over distinct productive clonotypes
+  # --- TIL clonotypes with enough cells, and the ex vivo clonotypes carrying them ---
+  selected <- names(til_counts$TIL_sc$counts)
+  stats <- condition_stats(md, id_column, conditions)
+  new_row <- function(id, status, key, matched_by, til_name) {
+    row <- stats::setNames(as.list(rep(NA_character_, ncol(tcr_table))), colnames(tcr_table))
+    row[[id_column]] <- id
+    row$Prioritize <- "FALSE"
+    row$Tier <- til_tier
+    row$Condition <- status
+    row$TIL_sc_clonotype <- til_name
+    for (column in names(til_counts)) {
+      x <- til_counts[[column]]
+      n <- if (key %in% names(x$counts)) as.integer(x$counts[[key]]) else 0L
+      row[[column]] <- sprintf("%d/%d (%.2f%%)", n, x$total, 100 * n / x$total)
+      row[[paste0(column, "_rank (N=", length(x$counts), ")")]] <- if (n > 0) as.character(as.integer(x$ranks[[key]])) else NA_character_
+    }
+    row$TIL_sc_matched_by <- matched_by
+    row$TIL_sc_match_key <- key
+    hit <- which(bulk_key == key)
+    if (length(hit) == 1) {
+      for (name in names(bulk_columns)) {
+        values <- bulk_productive[[bulk_columns[[name]]]]
+        if (!is.na(values[hit]) && values[hit] > 0) {
+          rank_column <- grep(paste0("^", name, "_rank \\(N="), colnames(tcr_table), value = TRUE)
+          row[[paste0(name, "_freq")]] <- decimal_comma(values[hit])
+          row[[rank_column]] <- as.character(sum(values[bulk_distinct] > values[hit], na.rm = TRUE) + 1L)
+        }
+      }
+    }
+    row
+  }
+  rows <- list()
+  cells_by_id <- split(seq_len(nrow(md)), as.character(md[[id_column]]))
+  for (key in selected) {   # key: cdr3_j (objects with sequences) or clonotype identifier
+    til_name <- if (use_sequence) pairs$clonotype[pairs$cdr3_j == key] else key
+    matchable <- use_sequence || key %in% bulk_pt$clonotype
+    exvivo_ids <- if (matchable) names(exvivo_key)[!is.na(exvivo_key) & exvivo_key == key] else character(0)
+    if (any(exvivo_ids %in% tcr_table[[id_column]])) {
+      exvivo_ids <- setdiff(exvivo_ids, tcr_table[[id_column]])   # already listed with the prioritization table
+      if (length(exvivo_ids) == 0) next
+    }
+    if (length(exvivo_ids) == 0) {
+      rows[[length(rows) + 1]] <- new_row(
+        paste("TIL", til_name),
+        if (matchable) til_groups[["absent"]] else til_groups[["unmatched"]],
+        key,
+        if (use_sequence) "CDR3b nucleotide sequence + TRBJ" else if (matchable) "clonotype ID (shared with the bulk TCRb table)" else
+          "clonotype ID of the TIL data; absent from the bulk TCRb table, so it cannot be searched in the ex vivo data",
+        til_name
+      )
+      next
+    }
+    for (id in exvivo_ids) {
+      row <- new_row(id, til_groups[["exvivo"]], key,
+                     if (use_sequence) "CDR3b nucleotide sequence + TRBJ" else "clonotype ID (shared with the bulk TCRb table)",
+                     til_name)
+      for (condition in conditions) {
+        cells <- cells_by_id[[id]][as.character(md$sample_id[cells_by_id[[id]]]) == condition]
+        row[[condition]] <- stats$activation[id, condition]
+        row[[paste0(condition, "_padj")]] <- stats$padj[id, condition]
+        row[[paste0(condition, "_cluster")]] <- main_state(md[[cluster_column]][cells])
+        if (phenotype_column %in% colnames(md)) {
+          row[[paste0(condition, "_phenotype")]] <- main_state(md[[phenotype_column]][cells])
+        }
+      }
+      rows[[length(rows) + 1]] <- row
+    }
+  }
+  # --- Internal control: the recomputed statistics reproduce the prioritization table ---
+  tabled <- intersect(tcr_table[[id_column]], rownames(stats$activation))
+  same <- function(a, b) (is.na(a) & is.na(b)) | (!is.na(a) & !is.na(b) & a == b)
+  agree_activation <- unlist(lapply(conditions, function(x) same(tcr_table[match(tabled, tcr_table[[id_column]]), x], stats$activation[tabled, x])))
+  agree_padj <- unlist(lapply(conditions, function(x) same(tcr_table[match(tabled, tcr_table[[id_column]]), paste0(x, "_padj")], stats$padj[tabled, x])))
+  cat(patient, compartment, "| TIL clonotypes:", length(selected),
+      "| control vs table: activation", sum(agree_activation), "/", length(agree_activation),
+      ", padj", sum(agree_padj), "/", length(agree_padj), "\n")
+  if (length(rows) == 0) {
+    return(tcr_table)
+  }
+  extra <- as.data.frame(do.call(rbind, lapply(rows, unlist)), stringsAsFactors = FALSE)
+  colnames(extra) <- colnames(tcr_table)
+  extra <- extra[order(match(extra$Condition, til_groups), -as.integer(sub("/.*$", "", extra$TIL_sc))), , drop = FALSE]
+  print(table(extra$Condition))
+  stopifnot(!anyDuplicated(c(tcr_table[[id_column]], extra[[id_column]])))
+  rbind(tcr_table, extra)
+}
+```
+
+# extract
+
+For each patient and compartment: UMAP coordinates, condition, cluster and clonotype of every cell, plus the
+prioritization table. The first column of the table (`TCR_ID` or `clonotype`, depending on the patient) is also
+the name of the metadata column that identifies the clonotype of each cell.
+
+```{r}
+# --- Condition order: Unpulsed, CD3CD28, Pept_pool, then R conditions in numeric order ---
+order_conditions <- function(x) {
+  x <- unique(as.character(x))
+  r_conditions <- grep("^R[0-9]+$", x, value = TRUE)
+  r_conditions <- r_conditions[order(as.numeric(sub("^R", "", r_conditions)))]
+  fixed <- intersect(c("Unpulsed", "CD3CD28", "Pept_pool"), x)
+  c(fixed, r_conditions, setdiff(x, c(fixed, r_conditions)))
+}
+extract_dataset <- function(patient, compartment, table_file, seurat_file) {
+  message("--- ", patient, " / ", compartment, " ---")
+  # --- Prioritization table, kept as text exactly as written ---
+  tcr_table <- read.delim(table_file, colClasses = "character", check.names = FALSE, na.strings = c("NA", ""))
+  id_column <- colnames(tcr_table)[1]
+  stopifnot(!anyDuplicated(tcr_table[[id_column]]))
+  # --- Cell-level data ---
+  obj <- readRDS(seurat_file)
+  md <- obj[[]]
+  stopifnot(
+    id_column %in% colnames(md),
+    cluster_column %in% colnames(md),
+    "sample_id" %in% colnames(md)
+  )
+  emb <- SeuratObject::Embeddings(obj, reduction = reduction)[rownames(md), 1:2]
+  rm(obj)
+  invisible(gc())
+  conditions <- order_conditions(md$sample_id)
+  # --- TIL clonotypes that are not in the table (viewer only) ---
+  tcr_table <- til_extended_table(patient, compartment, tcr_table, md, conditions)
+  # --- Cluster levels and colours as in DimPlot(group.by = cluster_column): default hue palette ---
+  cluster_levels <- levels(factor(md[[cluster_column]]))
+  cluster_colors <- scales::hue_pal()(length(cluster_levels))
+  clone_index <- match(as.character(md[[id_column]]), tcr_table[[id_column]]) - 1L
+  clone_index[is.na(clone_index)] <- -1L
+  # --- Internal controls ---
+  not_found <- setdiff(tcr_table[[id_column]][tcr_table$Tier != til_tier], as.character(md[[id_column]]))   # TIL-only entries have no ex vivo cells
+  if (length(not_found) > 0) {
+    warning(patient, " / ", compartment, ": clonotypes of the table without cells in the object: ",
+            paste(not_found, collapse = ", "))
+  }
+  missing_columns <- setdiff(conditions, colnames(tcr_table))
+  if (length(missing_columns) > 0) {
+    warning(patient, " / ", compartment, ": conditions without a column in the table: ",
+            paste(missing_columns, collapse = ", "))
+  }
+  cat(patient, compartment, "| cells:", nrow(md), "| conditions:", paste(conditions, collapse = ", "),
+      "| clusters:", length(cluster_levels), "| clonotypes in table:", nrow(tcr_table),
+      "| cells of those clonotypes:", sum(clone_index >= 0), "\n")
+  list(
+    patient = patient,
+    compartment = compartment,
+    source = sub(paste0("^", project_dir, "/"), "", table_file),
+    cluster_column = cluster_column,
+    conditions = I(conditions),
+    clusters = I(cluster_levels),
+    colors = I(cluster_colors),
+    x = quantize(emb[, 1]),
+    y = quantize(emb[, 2]),
+    cond = match(as.character(md$sample_id), conditions) - 1L,
+    clus = match(as.character(md[[cluster_column]]), cluster_levels) - 1L,
+    clone = clone_index,
+    til_cells = til_cells_of(patient, tcr_table),
+    table = list(
+      columns = I(colnames(tcr_table)),
+      rows = unname(as.matrix(tcr_table))
+    )
+  )
+}
+datasets <- lapply(seq_len(nrow(inputs)), function(i) {
+  extract_dataset(inputs$patient[i], inputs$compartment[i], inputs$table[i], inputs$seurat[i])
+})
+```
+
+# html
+
+The data are embedded as JSON in the HTML template (`scripts/reports/tcr-umap-viewer-template.html`), which contains the
+page layout and the drawing code.
+
+```{r}
+viewer_data <- list(
+  generated = format(Sys.Date()),
+  quant = coord_quant,
+  til_min_cells = til_min_cells,
+  til = til,
+  datasets = datasets
+)
+json <- jsonlite::toJSON(viewer_data, auto_unbox = TRUE, na = "null", digits = NA)
+# --- "</" must not appear inside a <script> block ---
+json <- gsub("</", "<\\/", json, fixed = TRUE)
+template <- paste(readLines(template_file, warn = FALSE, encoding = "UTF-8"), collapse = "\n")
+placeholder <- "/*__DATA__*/"
+parts <- strsplit(template, placeholder, fixed = TRUE)[[1]]
+stopifnot(length(parts) == 2)
+con <- file(output_file, open = "wb")
+writeLines(c(parts[1], json, parts[2]), con, sep = "", useBytes = TRUE)
+close(con)
+cat("Written:", output_file, "(", round(file.size(output_file) / 1024^2, 1), "MB )\n")
+```

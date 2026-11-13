@@ -1,0 +1,231 @@
+---
+title: "Frequency of prioritized TCR clonotypes in the TIL single-cell data"
+author: "Endika Prieto <endikaprieto@vhio.net>"
+date: "2026-11-13"
+---
+
+# setup
+
+For each clonotype of the prioritization tables, counts the cells carrying the same TCR in the single-cell data of
+the TILs of the same patient (CITE-seq object in `til-data/`; sorted PD1+ and PD1dim fractions, not the experimental
+conditions) and adds the result to the tables.
+
+The following columns are added to every `patients/<patient>/deconv/tcr/prioritized_<compartment>_tcrs_for_validation.tsv`,
+as `cells of the clonotype / TIL cells of the patient with a TCR (percentage)`:
+
+- `TIL_sc`: both sorted fractions of the patient together.
+- `TIL_sc_PD1p`, `TIL_sc_PD1d`: each sorted fraction separately.
+
+Each one is followed by its rank column, `<name>_rank (N=...)`: position of the clonotype among all the TIL
+clonotypes of the patient ordered by number of cells (1 = largest; ties share the lowest rank, as in the bulk
+rank columns), with N the number of clonotypes detected. The rank is `NA` for clonotypes not found among the TILs.
+
+Two more columns record how each clonotype was matched: `TIL_sc_matched_by` (basis of the match, or the reason
+why it cannot be matched) and `TIL_sc_match_key` (the beta-chain key or clonotype identifier searched in the TIL
+data of the patient). `tcr-umap-viewer.Rmd` uses them to locate the TIL cells of each clonotype.
+
+`NA` means that the clonotype cannot be matched to the TIL data (see "match"), which is different from `0/N`
+(matchable, but not found among the TILs).
+
+The Seurat objects are large: run this on a compute node, not on the front end. Run `tcr-umap-viewer.Rmd`
+afterwards to refresh the viewer.
+
+```{r, warning=FALSE, message=FALSE}
+# --- Define paths ---
+# R is started in renv-sturcotte/ (scripts/interactive-R.sh), so ".." is the project folder
+project_dir <- normalizePath("..", mustWork = TRUE)
+datapath <- file.path(project_dir, "patients")
+folder_data <- "deconv"
+til_file <- file.path(project_dir, "til-data", "cite1_2_3_4_5_6_8_withoutPat400304_TCR_ADT_virus_singlets.rds")
+bulk_file <- file.path(datapath, "clonotypes_adaptive_bulk_productivefreqs_update.rds")   # same file as in petasan .../sturcotte/tcrb/
+# --- Parameters ---
+patients_sel <- NULL   # NULL = every patient with a prioritization table; or e.g. c("pt3385", "pt3513")
+til_prefix <- "^TIL_sc"   # columns written by this script (replaced when it is run again)
+til_subsets <- c(TIL_sc_PD1p = "PD1p", TIL_sc_PD1d = "PD1d")
+# --- Load libraries ---
+library(SeuratObject)
+```
+
+# load
+
+Cell metadata of the TIL object. Only cells with a TCR (beta chain) are used; they are the denominator of the
+frequencies. `cdr3_j` is the CDR3 beta nucleotide sequence plus the TRBJ gene, the same key used to match the
+bulk TCR beta repertoires in `deconv-analysis.Rmd`.
+
+```{r}
+til <- readRDS(til_file)[[]]
+invisible(gc())
+stopifnot(all(c("patient_id", "subset_id", "clonotype", "cdr3_j") %in% colnames(til)))
+til <- til[!is.na(til$clonotype) & !is.na(til$cdr3_j), c("patient_id", "subset_id", "clonotype", "cdr3_j")]
+stopifnot(all(til$subset_id %in% til_subsets))
+# --- One beta chain per clonotype identifier and vice versa, within each patient ---
+til_pairs <- unique(til[, c("patient_id", "clonotype", "cdr3_j")])
+stopifnot(
+  !anyDuplicated(til_pairs[, c("patient_id", "clonotype")]),
+  !anyDuplicated(til_pairs[, c("patient_id", "cdr3_j")])
+)
+bulk <- readRDS(bulk_file)
+table(til$patient_id, til$subset_id)
+```
+
+Prioritization tables.
+
+```{r}
+tables <- list.files(
+  datapath,
+  pattern = "^prioritized_.*_tcrs_for_validation\\.tsv$",
+  recursive = TRUE,
+  full.names = TRUE
+)
+tables <- tables[basename(dirname(tables)) == "tcr" & basename(dirname(dirname(tables))) == folder_data]
+inputs <- data.frame(
+  patient = basename(dirname(dirname(dirname(tables)))),
+  compartment = sub("^prioritized_(.*)_tcrs_for_validation\\.tsv$", "\\1", basename(tables)),
+  table = tables
+)
+inputs$seurat <- file.path(datapath, inputs$patient, folder_data, "seurat", paste0("obj_", inputs$compartment, "_TCR.rds"))
+if (!is.null(patients_sel)) {
+  inputs <- inputs[inputs$patient %in% patients_sel, , drop = FALSE]
+}
+stopifnot(nrow(inputs) > 0, file.exists(inputs$seurat))
+inputs[, c("patient", "compartment")]
+```
+
+# match
+
+How each clonotype of a table is matched to the TIL cells of the same patient depends on what the deconvolution
+object contains:
+
+- **Objects with V(D)J sequences** (`cdr3_nt`, `j_gene`, `chains`; pt3385, pt600280, pt600311): by the exact
+  CDR3 beta nucleotide sequence and TRBJ gene (`cdr3_j`), taking the most frequent beta chain of the clonotype,
+  as done for the bulk repertoires.
+- **Objects without V(D)J sequences** (pt3328, pt3513): by the `clonotype` identifier, and only for identifiers
+  that exist in the bulk TCR beta table of the patient. Those identifiers mean the same sequence in every dataset.
+  Identifiers above that range were assigned independently in each dataset to clonotypes absent from bulk, so
+  the same identifier is a different TCR in the TIL and the deconvolution objects (checked in pt3385, where both
+  the identifier and the sequence are available); they are left as `NA`.
+
+```{r}
+# --- Most frequent beta-chain key (CDR3 nt + TRBJ) of each clonotype, as in deconv-analysis.Rmd ---
+beta_keys <- function(md, id_column) {
+  md <- md[!is.na(md[[id_column]]), c(id_column, "chains", "cdr3_nt", "j_gene")]
+  keys <- Map(
+    function(chain, nt, j) {
+      if (anyNA(c(chain, nt, j))) {
+        return(character(0))
+      }
+      chain <- trimws(strsplit(chain, ";", fixed = TRUE)[[1]])
+      nt <- trimws(strsplit(nt, ";", fixed = TRUE)[[1]])
+      j <- trimws(strsplit(j, ";", fixed = TRUE)[[1]])
+      if (length(chain) != length(nt) || length(nt) != length(j)) {
+        return(character(0))
+      }
+      beta_idx <- which(chain == "TRB" & grepl("^TRBJ", j) & grepl("^[ACGT]+$", nt))
+      paste0(nt[beta_idx], "_", sub("\\*.*$", "", j[beta_idx]))
+    },
+    md$chains, md$cdr3_nt, md$j_gene
+  )
+  long <- data.frame(
+    id = rep(as.character(md[[id_column]]), lengths(keys)),
+    cdr3_j = unlist(keys, use.names = FALSE)
+  )
+  counts <- stats::aggregate(Freq ~ id + cdr3_j, data = cbind(long, Freq = 1L), FUN = sum)
+  counts <- counts[order(counts$id, -counts$Freq, counts$cdr3_j), ]
+  counts <- counts[!duplicated(counts$id), ]
+  stats::setNames(counts$cdr3_j, counts$id)
+}
+format_frequency <- function(n, total) {
+  ifelse(is.na(n), NA_character_, sprintf("%d/%d (%.2f%%)", n, total, 100 * n / total))
+}
+add_til_frequency <- function(patient, compartment, table_file, seurat_file) {
+  message("--- ", patient, " / ", compartment, " ---")
+  til_patient <- paste0("CHUM_", sub("^pt", "", patient))
+  til_pt <- til[til$patient_id == til_patient, ]
+  if (nrow(til_pt) == 0) {
+    stop("Patient not found in the TIL object: ", til_patient)
+  }
+  # --- Table kept as text exactly as written, so that the existing columns do not change ---
+  tcr_table <- read.delim(table_file, colClasses = "character", check.names = FALSE,
+                          na.strings = character(0), quote = "")
+  tcr_table <- tcr_table[, !grepl(til_prefix, colnames(tcr_table)), drop = FALSE]
+  id_column <- colnames(tcr_table)[1]
+  ids <- tcr_table[[id_column]]
+  stopifnot(!anyDuplicated(ids))
+  # --- Key of each clonotype in the TIL data ---
+  md <- readRDS(seurat_file)[[]]
+  invisible(gc())
+  stopifnot(id_column %in% colnames(md))
+  if (all(c("chains", "cdr3_nt", "j_gene") %in% colnames(md))) {
+    method <- "cdr3_j"
+    matched_by <- "CDR3b nucleotide sequence + TRBJ"
+    unmatched <- "not matchable: no TRB CDR3 nucleotide sequence in the deconvolution object"
+    key <- unname(beta_keys(md, id_column)[ids])
+    til_key <- til_pt$cdr3_j
+  } else {
+    method <- "clonotype"
+    matched_by <- "clonotype ID (shared with the bulk TCRb table)"
+    unmatched <- "not matchable: clonotype ID absent from the bulk TCRb table (not comparable across datasets)"
+    stopifnot(id_column == "clonotype")
+    bulk_pt <- bulk[[til_patient]]
+    if (is.null(bulk_pt)) {
+      stop("Bulk sample not found: ", til_patient)
+    }
+    key <- ifelse(ids %in% bulk_pt$clonotype, ids, NA_character_)
+    til_key <- til_pt$clonotype
+  }
+  # --- Cells of each clonotype among the TIL cells with a TCR, overall and per sorted fraction ---
+  # --- Rank among all the TIL clonotypes of the patient (1 = most cells; ties share the lowest rank, as for bulk) ---
+  count_cells <- function(cells, column) {
+    til_counts <- table(til_key[cells])
+    til_ranks <- rank(-til_counts, ties.method = "min")
+    n <- as.integer(til_counts[key])
+    n[!is.na(key) & is.na(n)] <- 0L
+    out <- data.frame(
+      frequency = format_frequency(n, sum(cells)),
+      rank = as.character(as.integer(til_ranks[key]))
+    )
+    colnames(out) <- c(column, paste0(column, "_rank (N=", length(til_counts), ")"))
+    out
+  }
+  result <- count_cells(rep(TRUE, nrow(til_pt)), "TIL_sc")
+  for (column in names(til_subsets)) {
+    result <- cbind(result, count_cells(til_pt$subset_id == til_subsets[[column]], column))
+  }
+  # --- Basis of the match and key searched in the TIL data ---
+  result$TIL_sc_matched_by <- ifelse(is.na(key), unmatched, matched_by)
+  result$TIL_sc_match_key <- key
+  result[is.na(result)] <- "NA"
+  # --- Insert after the bulk repertoire columns ---
+  rank_columns <- grep("_rank \\(N=", colnames(tcr_table))
+  position <- if (length(rank_columns) > 0) max(rank_columns) else ncol(tcr_table)
+  updated <- cbind(
+    tcr_table[, seq_len(position), drop = FALSE],
+    result,
+    tcr_table[, seq_len(ncol(tcr_table))[-seq_len(position)], drop = FALSE]
+  )
+  # --- Internal controls: rows, order and existing columns are untouched ---
+  stopifnot(
+    nrow(updated) == nrow(tcr_table),
+    identical(updated[[id_column]], ids),
+    identical(updated[, colnames(tcr_table)], tcr_table)
+  )
+  write.table(updated, table_file, sep = "\t", row.names = FALSE, quote = FALSE)
+  matched <- !is.na(key)
+  found <- matched & !grepl("^0/", result$TIL_sc)
+  data.frame(
+    patient = patient,
+    compartment = compartment,
+    matched_by = method,
+    til_cells_with_tcr = nrow(til_pt),
+    clonotypes = length(ids),
+    matchable = sum(matched),
+    found_in_til = sum(found),
+    prioritized = sum(tcr_table$Prioritize == "TRUE"),
+    prioritized_found_in_til = sum(found & tcr_table$Prioritize == "TRUE")
+  )
+}
+summary_table <- do.call(rbind, lapply(seq_len(nrow(inputs)), function(i) {
+  add_til_frequency(inputs$patient[i], inputs$compartment[i], inputs$table[i], inputs$seurat[i])
+}))
+summary_table
+```

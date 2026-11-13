@@ -1,0 +1,671 @@
+Package	LibPath	Version	Priority	Built	Repository	RemoteType	RemoteSha
+abdiv	~/R/library	0.2.0	NA	4.5.2	CRAN	NA	NA
+abind	~/R/library	1.4-8	NA	4.5.2	CRAN	standard	1.4-8
+admisc	~/R/library	0.40	NA	4.5.2	CRAN	standard	0.40
+AER	~/R/library	1.2-15	NA	4.5.2	CRAN	standard	1.2-15
+alabaster.base	~/R/library	1.10.0	NA	4.5.2	Bioconductor 3.22	NA	NA
+alabaster.matrix	~/R/library	1.10.0	NA	4.5.2	Bioconductor 3.22	NA	NA
+alabaster.ranges	~/R/library	1.10.0	NA	4.5.2	Bioconductor 3.22	NA	NA
+alabaster.schemas	~/R/library	1.10.0	NA	4.5.2	Bioconductor 3.22	NA	NA
+alabaster.se	~/R/library	1.10.0	NA	4.5.2	Bioconductor 3.22	NA	NA
+AnnotationDbi	~/R/library	1.72.0	NA	4.5.2	Bioconductor 3.22	NA	NA
+AnnotationHub	~/R/library	4.0.0	NA	4.5.2	Bioconductor 3.22	NA	NA
+askpass	~/R/library	1.2.1	NA	4.5.2	CRAN	standard	1.2.1
+assertthat	~/R/library	0.2.1	NA	4.5.2	CRAN	standard	0.2.1
+assorthead	~/R/library	1.4.0	NA	4.5.2	Bioconductor 3.22	NA	NA
+babelgene	~/R/library	22.9	NA	4.5.2	CRAN	standard	22.9
+backports	~/R/library	1.5.0	NA	4.5.2	CRAN	standard	1.5.0
+base64enc	~/R/library	0.1-3	NA	4.5.2	CRAN	standard	0.1-3
+beachmat	~/R/library	2.26.0	NA	4.5.2	Bioconductor 3.22	NA	NA
+beeswarm	~/R/library	0.4.0	NA	4.5.2	CRAN	NA	NA
+BH	~/R/library	1.90.0-1	NA	4.5.2	CRAN	standard	1.90.0-1
+Biobase	~/R/library	2.70.0	NA	4.5.2	Bioconductor 3.22	NA	NA
+BiocBaseUtils	~/R/library	1.12.0	NA	4.5.2	Bioconductor 3.22	NA	NA
+BiocFileCache	~/R/library	3.0.0	NA	4.5.2	Bioconductor 3.22	NA	NA
+BiocGenerics	~/R/library	0.56.0	NA	4.5.2	Bioconductor 3.22	NA	NA
+BiocIO	~/R/library	1.20.0	NA	4.5.2	Bioconductor 3.22	NA	NA
+BiocNeighbors	~/R/library	2.4.0	NA	4.5.2	Bioconductor 3.22	NA	NA
+BiocParallel	~/R/library	1.44.0	NA	4.5.2	Bioconductor 3.22	NA	NA
+BiocSingular	~/R/library	1.26.1	NA	4.5.2	Bioconductor 3.22	NA	NA
+BiocVersion	~/R/library	3.22.0	NA	4.5.2	Bioconductor 3.22	NA	NA
+Biostrings	~/R/library	2.78.0	NA	4.5.2	Bioconductor 3.22	NA	NA
+bit	~/R/library	4.6.0	NA	4.5.2	CRAN	NA	NA
+bit64	~/R/library	4.6.0-1	NA	4.5.2	CRAN	NA	NA
+bitops	~/R/library	1.0-9	NA	4.5.2	CRAN	standard	1.0-9
+blob	~/R/library	1.2.4	NA	4.5.2	CRAN	NA	NA
+bluster	~/R/library	1.20.0	NA	4.5.2	Bioconductor 3.22	NA	NA
+brio	~/R/library	1.1.5	NA	4.5.2	CRAN	standard	1.1.5
+broom	~/R/library	1.0.12	NA	4.5.2	CRAN	standard	1.0.12
+bslib	~/R/library	0.9.0	NA	4.5.2	CRAN	standard	0.9.0
+ca	~/R/library	0.71.1	NA	4.5.2	CRAN	standard	0.71.1
+cachem	~/R/library	1.1.0	NA	4.5.2	CRAN	standard	1.1.0
+Cairo	~/R/library	1.7-0	NA	4.5.2	CRAN	NA	NA
+callr	~/R/library	3.7.6	NA	4.5.2	CRAN	standard	3.7.6
+car	~/R/library	3.1-3	NA	4.5.2	CRAN	standard	3.1-3
+carData	~/R/library	3.0-6	NA	4.5.2	CRAN	standard	3.0-6
+caTools	~/R/library	1.18.3	NA	4.5.2	CRAN	standard	1.18.3
+celldex	~/R/library	1.20.0	NA	4.5.2	Bioconductor 3.22	NA	NA
+checkmate	~/R/library	2.3.3	NA	4.5.2	CRAN	standard	2.3.3
+cigarillo	~/R/library	1.0.0	NA	4.5.2	Bioconductor 3.22	NA	NA
+circlize	~/R/library	0.4.18	NA	4.5.2	CRAN	NA	NA
+classInt	~/R/library	0.4-11	NA	4.5.2	CRAN	standard	0.4-11
+cli	~/R/library	3.6.5	NA	4.5.2	CRAN	standard	3.6.5
+clue	~/R/library	0.3-68	NA	4.5.2	CRAN	NA	NA
+coda	~/R/library	0.19-4.1	NA	4.5.2	CRAN	standard	0.19-4.1
+coin	~/R/library	1.4-3	NA	4.5.2	CRAN	standard	1.4-3
+colorspace	~/R/library	2.1-2	NA	4.5.2	CRAN	standard	2.1-2
+commonmark	~/R/library	2.0.0	NA	4.5.2	CRAN	standard	2.0.0
+ComplexHeatmap	~/R/library	2.26.1	NA	4.5.2	Bioconductor 3.22	NA	NA
+config	~/R/library	0.3.2	NA	4.5.2	CRAN	standard	0.3.2
+corrplot	~/R/library	0.95	NA	4.5.2	CRAN	standard	0.95
+covr	~/R/library	3.6.5	NA	4.5.2	CRAN	standard	3.6.5
+cowplot	~/R/library	1.2.0	NA	4.5.2	CRAN	standard	1.2.0
+cpp11	~/R/library	0.5.2	NA	4.5.2	CRAN	standard	0.5.2
+crayon	~/R/library	1.5.3	NA	4.5.2	CRAN	NA	NA
+credentials	~/R/library	2.0.3	NA	4.5.2	CRAN	standard	2.0.3
+crosstalk	~/R/library	1.2.2	NA	4.5.2	CRAN	standard	1.2.2
+curl	~/R/library	7.0.0	NA	4.5.2	CRAN	standard	7.0.0
+data.table	~/R/library	1.18.0	NA	4.5.2	CRAN	standard	1.18.0
+DBI	~/R/library	1.2.3	NA	4.5.2	CRAN	NA	NA
+dbplyr	~/R/library	2.5.1	NA	4.5.2	CRAN	NA	NA
+dbscan	~/R/library	1.2.5	NA	4.5.2	CRAN	NA	NA
+DelayedArray	~/R/library	0.36.0	NA	4.5.2	Bioconductor 3.22	NA	NA
+DelayedMatrixStats	~/R/library	1.32.0	NA	4.5.2	Bioconductor 3.22	NA	NA
+deldir	~/R/library	2.0-4	NA	4.5.2	CRAN	standard	2.0-4
+Deriv	~/R/library	4.2.0	NA	4.5.2	CRAN	standard	4.2.0
+desc	~/R/library	1.4.3	NA	4.5.2	CRAN	standard	1.4.3
+dichromat	~/R/library	2.0-1	NA	4.5.2	CRAN	standard	2.0-1
+diffobj	~/R/library	0.3.6	NA	4.5.2	CRAN	standard	0.3.6
+digest	~/R/library	0.6.39	NA	4.5.2	CRAN	standard	0.6.39
+distributional	~/R/library	0.6.0	NA	4.5.2	CRAN	standard	0.6.0
+djvdj	~/R/library	0.1.0	NA	4.5.2	NA	github	3a376075d1a81eb6866d8c2723e35dc42ea83fce
+doBy	~/R/library	4.7.1	NA	4.5.2	CRAN	standard	4.7.1
+doParallel	~/R/library	1.0.17	NA	4.5.2	CRAN	NA	NA
+dotCall64	~/R/library	1.2	NA	4.5.2	CRAN	standard	1.2
+dotty	~/R/library	0.1.0	NA	4.5.2	CRAN	standard	0.1.0
+dplyr	~/R/library	1.2.1	NA	4.5.2	CRAN	standard	1.2.1
+dqrng	~/R/library	0.4.1	NA	4.5.2	CRAN	standard	0.4.1
+e1071	~/R/library	1.7-17	NA	4.5.2	CRAN	standard	1.7-17
+edgeR	~/R/library	4.8.2	NA	4.5.2	Bioconductor 3.22	NA	NA
+evaluate	~/R/library	1.0.5	NA	4.5.2	CRAN	standard	1.0.5
+evmix	~/R/library	2.12	NA	4.5.2	CRAN	NA	NA
+ExperimentHub	~/R/library	3.0.0	NA	4.5.2	Bioconductor 3.22	NA	NA
+farver	~/R/library	2.1.2	NA	4.5.2	CRAN	standard	2.1.2
+fastDummies	~/R/library	1.7.5	NA	4.5.2	CRAN	standard	1.7.5
+fastmap	~/R/library	1.2.0	NA	4.5.2	CRAN	standard	1.2.0
+filelock	~/R/library	1.0.3	NA	4.5.2	CRAN	NA	NA
+fitdistrplus	~/R/library	1.2-4	NA	4.5.2	CRAN	standard	1.2-4
+FNN	~/R/library	1.1.4.1	NA	4.5.2	CRAN	standard	1.1.4.1
+fontawesome	~/R/library	0.5.3	NA	4.5.2	CRAN	standard	0.5.3
+foreach	~/R/library	1.5.2	NA	4.5.2	CRAN	standard	1.5.2
+forecast	~/R/library	9.0.0	NA	4.5.2	CRAN	standard	9.0.0
+formatR	~/R/library	1.14	NA	4.5.2	CRAN	standard	1.14
+Formula	~/R/library	1.2-5	NA	4.5.2	CRAN	standard	1.2-5
+fracdiff	~/R/library	1.5-3	NA	4.5.2	CRAN	standard	1.5-3
+fs	~/R/library	2.1.0	NA	4.5.2	CRAN	standard	2.1.0
+futile.logger	~/R/library	1.4.9	NA	4.5.2	CRAN	NA	NA
+futile.options	~/R/library	1.0.1	NA	4.5.2	CRAN	NA	NA
+future	~/R/library	1.68.0	NA	4.5.2	CRAN	standard	1.68.0
+future.apply	~/R/library	1.20.1	NA	4.5.2	CRAN	standard	1.20.1
+gclus	~/R/library	1.3.3	NA	4.5.2	CRAN	standard	1.3.3
+generics	~/R/library	0.1.4	NA	4.5.2	CRAN	standard	0.1.4
+GenomeInfoDb	~/R/library	1.46.2	NA	4.5.2	Bioconductor 3.22	NA	NA
+GenomicAlignments	~/R/library	1.46.0	NA	4.5.2	Bioconductor 3.22	NA	NA
+GenomicRanges	~/R/library	1.62.1	NA	4.5.2	Bioconductor 3.22	NA	NA
+geometries	~/R/library	0.2.5	NA	4.5.2	CRAN	standard	0.2.5
+geometry	~/R/library	0.5.2	NA	4.5.2	CRAN	standard	0.5.2
+GetoptLong	~/R/library	1.1.1	NA	4.5.2	CRAN	NA	NA
+ggalluvial	~/R/library	0.12.5	NA	4.5.2	CRAN	NA	NA
+gganimate	~/R/library	1.0.11	NA	4.5.2	CRAN	standard	1.0.11
+ggbeeswarm	~/R/library	0.7.3	NA	4.5.2	CRAN	NA	NA
+ggdendro	~/R/library	0.2.0	NA	4.5.2	CRAN	NA	NA
+ggforce	~/R/library	0.5.0	NA	4.5.2	CRAN	standard	0.5.0
+ggparty	~/R/library	1.0.0.1	NA	4.5.2	CRAN	standard	1.0.0.1
+ggplot2	~/R/library	4.0.1	NA	4.5.2	CRAN	standard	4.0.1
+ggpubr	~/R/library	1.0.0	NA	4.5.2	CRAN	standard	1.0.0
+ggraph	~/R/library	2.2.2	NA	4.5.2	CRAN	standard	2.2.2
+ggrastr	~/R/library	1.0.2	NA	4.5.2	CRAN	NA	NA
+ggrepel	~/R/library	0.9.6	NA	4.5.2	CRAN	standard	0.9.6
+ggridges	~/R/library	0.5.7	NA	4.5.2	CRAN	standard	0.5.7
+ggsci	~/R/library	5.2.0	NA	4.5.2	CRAN	standard	5.2.0
+ggseqlogo	~/R/library	0.2.2	NA	4.5.2	CRAN	NA	NA
+ggsignif	~/R/library	0.6.4	NA	4.5.2	CRAN	standard	0.6.4
+ggtrace	~/R/library	0.2.0	NA	4.5.2	CRAN	NA	NA
+ggVennDiagram	~/R/library	1.5.7	NA	4.5.2	CRAN	standard	1.5.7
+glmGamPoi	~/R/library	1.22.0	NA	4.5.2	Bioconductor 3.22	NA	NA
+GlobalOptions	~/R/library	0.1.4	NA	4.5.2	CRAN	NA	NA
+globals	~/R/library	0.18.0	NA	4.5.2	CRAN	standard	0.18.0
+glue	~/R/library	1.8.0	NA	4.5.2	CRAN	standard	1.8.0
+goftest	~/R/library	1.2-3	NA	4.5.2	CRAN	standard	1.2-3
+gplots	~/R/library	3.3.0	NA	4.5.2	CRAN	standard	3.3.0
+graphlayouts	~/R/library	1.2.2	NA	4.5.2	CRAN	standard	1.2.2
+gridExtra	~/R/library	2.3	NA	4.5.2	CRAN	standard	2.3
+gsl	~/R/library	2.1-9	NA	4.5.2	CRAN	NA	NA
+gtable	~/R/library	0.3.6	NA	4.5.2	CRAN	standard	0.3.6
+gtools	~/R/library	3.9.5	NA	4.5.2	CRAN	standard	3.9.5
+gypsum	~/R/library	1.6.0	NA	4.5.2	Bioconductor 3.22	NA	NA
+h5mread	~/R/library	1.2.1	NA	4.5.2	Bioconductor 3.22	NA	NA
+hash	~/R/library	2.2.6.4	NA	4.5.2	CRAN	NA	NA
+HDF5Array	~/R/library	1.38.0	NA	4.5.2	Bioconductor 3.22	NA	NA
+here	~/R/library	1.0.2	NA	4.5.2	CRAN	standard	1.0.2
+highr	~/R/library	0.11	NA	4.5.2	CRAN	standard	0.11
+hms	~/R/library	1.1.4	NA	4.5.2	CRAN	standard	1.1.4
+htmltools	~/R/library	0.5.9	NA	4.5.2	CRAN	standard	0.5.9
+htmlwidgets	~/R/library	1.6.4	NA	4.5.2	CRAN	standard	1.6.4
+httpuv	~/R/library	1.6.16	NA	4.5.2	CRAN	standard	1.6.16
+httr	~/R/library	1.4.7	NA	4.5.2	CRAN	standard	1.4.7
+httr2	~/R/library	1.2.2	NA	4.5.2	CRAN	NA	NA
+hunspell	~/R/library	3.0.6	NA	4.5.2	CRAN	standard	3.0.6
+ica	~/R/library	1.0-3	NA	4.5.2	CRAN	standard	1.0-3
+igraph	~/R/library	2.2.1	NA	4.5.2	CRAN	standard	2.2.1
+immApex	~/R/library	1.4.3	NA	4.5.2	Bioconductor 3.22	NA	NA
+iNEXT	~/R/library	3.0.2	NA	4.5.2	CRAN	NA	NA
+inline	~/R/library	0.3.21	NA	4.5.2	CRAN	standard	0.3.21
+inum	~/R/library	1.0-5	NA	4.5.2	CRAN	standard	1.0-5
+IRanges	~/R/library	2.44.0	NA	4.5.2	Bioconductor 3.22	NA	NA
+irlba	~/R/library	2.3.5.1	NA	4.5.2	CRAN	standard	2.3.5.1
+isoband	~/R/library	0.3.0	NA	4.5.2	CRAN	standard	0.3.0
+iterators	~/R/library	1.0.14	NA	4.5.2	CRAN	standard	1.0.14
+jquerylib	~/R/library	0.1.4	NA	4.5.2	CRAN	standard	0.1.4
+jsonlite	~/R/library	2.0.0	NA	4.5.2	CRAN	standard	2.0.0
+jsonvalidate	~/R/library	1.5.0	NA	4.5.2	CRAN	NA	NA
+KEGGREST	~/R/library	1.50.0	NA	4.5.2	Bioconductor 3.22	NA	NA
+keras	~/R/library	2.16.1	NA	4.5.2	CRAN	NA	NA
+keras3	~/R/library	1.5.1	NA	4.5.2	CRAN	standard	1.5.1
+kernlab	~/R/library	0.9-33	NA	4.5.2	CRAN	NA	NA
+knitr	~/R/library	1.51	NA	4.5.2	CRAN	standard	1.51
+ks	~/R/library	1.15.1	NA	4.5.2	CRAN	NA	NA
+labeling	~/R/library	0.4.3	NA	4.5.2	CRAN	standard	0.4.3
+lambda.r	~/R/library	1.2.4	NA	4.5.2	CRAN	NA	NA
+later	~/R/library	1.4.5	NA	4.5.2	CRAN	standard	1.4.5
+lazyeval	~/R/library	0.2.2	NA	4.5.2	CRAN	standard	0.2.2
+libcoin	~/R/library	1.0-10	NA	4.5.2	CRAN	standard	1.0-10
+lifecycle	~/R/library	1.0.5	NA	4.5.2	CRAN	standard	1.0.5
+limma	~/R/library	3.66.0	NA	4.5.2	Bioconductor 3.22	NA	NA
+linprog	~/R/library	0.9-6	NA	4.5.2	CRAN	standard	0.9-6
+listenv	~/R/library	0.10.0	NA	4.5.2	CRAN	standard	0.10.0
+lme4	~/R/library	1.1-38	NA	4.5.2	CRAN	standard	1.1-38
+lmtest	~/R/library	0.9-40	NA	4.5.2	CRAN	standard	0.9-40
+locfit	~/R/library	1.5-9.12	NA	4.5.2	CRAN	NA	NA
+loo	~/R/library	2.9.0	NA	4.5.2	CRAN	standard	2.9.0
+lpSolve	~/R/library	5.6.23	NA	4.5.2	CRAN	standard	5.6.23
+lwgeom	~/R/library	0.2-15	NA	4.5.2	CRAN	standard	0.2-15
+magic	~/R/library	1.6-1	NA	4.5.2	CRAN	standard	1.6-1
+magrittr	~/R/library	2.0.4	NA	4.5.2	CRAN	standard	2.0.4
+mapproj	~/R/library	1.2.12	NA	4.5.2	CRAN	standard	1.2.12
+maps	~/R/library	3.4.3	NA	4.5.2	CRAN	standard	3.4.3
+MatrixGenerics	~/R/library	1.22.0	NA	4.5.2	Bioconductor 3.22	NA	NA
+MatrixModels	~/R/library	0.5-4	NA	4.5.2	CRAN	standard	0.5-4
+matrixStats	~/R/library	1.5.0	NA	4.5.2	CRAN	standard	1.5.0
+mclust	~/R/library	6.1.2	NA	4.5.2	CRAN	NA	NA
+memoise	~/R/library	2.0.1	NA	4.5.2	CRAN	standard	2.0.1
+metapod	~/R/library	1.18.0	NA	4.5.2	Bioconductor 3.22	NA	NA
+microbenchmark	~/R/library	1.5.0	NA	4.5.2	CRAN	standard	1.5.0
+mime	~/R/library	0.13	NA	4.5.2	CRAN	standard	0.13
+miniUI	~/R/library	0.1.2	NA	4.5.2	CRAN	standard	0.1.2
+minqa	~/R/library	1.2.8	NA	4.5.2	CRAN	standard	1.2.8
+mlbench	~/R/library	2.1-6	NA	4.5.2	CRAN	standard	2.1-6
+modelr	~/R/library	0.1.11	NA	4.5.2	CRAN	standard	0.1.11
+modeltools	~/R/library	0.2-24	NA	4.5.2	CRAN	standard	0.2-24
+msigdbr	~/R/library	26.1.1	NA	4.5.2	CRAN	standard	26.1.1
+multcomp	~/R/library	1.4-29	NA	4.5.2	CRAN	standard	1.4-29
+multicool	~/R/library	1.0.1	NA	4.5.2	CRAN	NA	NA
+mvtnorm	~/R/library	1.3-3	NA	4.5.2	CRAN	standard	1.3-3
+Nebulosa	~/R/library	1.20.0	NA	4.5.2	Bioconductor 3.22	NA	NA
+network	~/R/library	1.19.0	NA	4.5.2	CRAN	standard	1.19.0
+nloptr	~/R/library	2.2.1	NA	4.5.2	CRAN	standard	2.2.1
+numDeriv	~/R/library	2016.8-1.1	NA	4.5.2	CRAN	standard	2016.8-1.1
+openai	~/R/library	0.4.1	NA	4.5.2	CRAN	standard	0.4.1
+openssl	~/R/library	2.3.4	NA	4.5.2	CRAN	standard	2.3.4
+org.Hs.eg.db	~/R/library	3.22.0	NA	4.5.2	NA	NA	NA
+otel	~/R/library	0.2.0	NA	4.5.2	CRAN	standard	0.2.0
+pals	~/R/library	1.10	NA	4.5.2	CRAN	standard	1.10
+pander	~/R/library	0.6.6	NA	4.5.2	CRAN	standard	0.6.6
+parallelly	~/R/library	1.46.1	NA	4.5.2	CRAN	standard	1.46.1
+partykit	~/R/library	1.2-24	NA	4.5.2	CRAN	standard	1.2-24
+patchwork	~/R/library	1.3.2	NA	4.5.2	CRAN	standard	1.3.2
+pbapply	~/R/library	1.7-4	NA	4.5.2	CRAN	standard	1.7-4
+pbkrtest	~/R/library	0.5.5	NA	4.5.2	CRAN	standard	0.5.5
+pdfCluster	~/R/library	1.0-4	NA	4.5.2	CRAN	standard	1.0-4
+permute	~/R/library	0.9-8	NA	4.5.2	CRAN	standard	0.9-8
+pheatmap	~/R/library	1.0.13	NA	4.5.2	CRAN	standard	1.0.13
+pillar	~/R/library	1.11.1	NA	4.5.2	CRAN	standard	1.11.1
+pkgbuild	~/R/library	1.4.8	NA	4.5.2	CRAN	standard	1.4.8
+pkgconfig	~/R/library	2.0.3	NA	4.5.2	CRAN	standard	2.0.3
+pkgload	~/R/library	1.4.1	NA	4.5.2	CRAN	standard	1.4.1
+plogr	~/R/library	0.2.0	NA	4.5.2	CRAN	NA	NA
+plotly	~/R/library	4.11.0	NA	4.5.2	CRAN	standard	4.11.0
+plyr	~/R/library	1.8.9	NA	4.5.2	CRAN	standard	1.8.9
+png	~/R/library	0.1-8	NA	4.5.2	CRAN	standard	0.1-8
+polyclip	~/R/library	1.10-7	NA	4.5.2	CRAN	standard	1.10-7
+polynom	~/R/library	1.4-1	NA	4.5.2	CRAN	standard	1.4-1
+posterior	~/R/library	1.6.1	NA	4.5.2	CRAN	standard	1.6.1
+pracma	~/R/library	2.4.6	NA	4.5.2	CRAN	NA	NA
+praise	~/R/library	1.0.0	NA	4.5.2	CRAN	standard	1.0.0
+presto	~/R/library	1.1.0	NA	4.5.2	CRAN	standard	1.1.0
+prettyunits	~/R/library	1.2.0	NA	4.5.2	CRAN	standard	1.2.0
+pROC	~/R/library	1.19.1	NA	4.5.2	CRAN	standard	1.19.1
+processx	~/R/library	3.8.6	NA	4.5.2	CRAN	standard	3.8.6
+progress	~/R/library	1.2.3	NA	4.5.2	CRAN	standard	1.2.3
+progressr	~/R/library	0.18.0	NA	4.5.2	CRAN	standard	0.18.0
+ProjecTILs	~/R/library	3.7.0	NA	4.5.2	NA	github	1159e1778820180fd0233bbfc0d7f296e35bd25f
+promises	~/R/library	1.5.0	NA	4.5.2	CRAN	standard	1.5.0
+proxy	~/R/library	0.4-29	NA	4.5.2	CRAN	standard	0.4-29
+ps	~/R/library	1.9.1	NA	4.5.2	CRAN	standard	1.9.1
+purrr	~/R/library	1.2.0	NA	4.5.2	CRAN	standard	1.2.0
+qap	~/R/library	0.1-2	NA	4.5.2	CRAN	standard	0.1-2
+quadprog	~/R/library	1.5-8	NA	4.5.2	CRAN	standard	1.5-8
+quantmod	~/R/library	0.4.28	NA	4.5.2	CRAN	standard	0.4.28
+quantreg	~/R/library	6.1	NA	4.5.2	CRAN	standard	6.1
+QuickJSR	~/R/library	1.9.0	NA	4.5.2	CRAN	standard	1.9.0
+R6	~/R/library	2.6.1	NA	4.5.2	CRAN	standard	2.6.1
+ragg	~/R/library	1.5.0	NA	4.5.2	CRAN	NA	NA
+RANN	~/R/library	2.6.2	NA	4.5.2	CRAN	standard	2.6.2
+rappdirs	~/R/library	0.3.3	NA	4.5.2	CRAN	standard	0.3.3
+rbibutils	~/R/library	2.4.1	NA	4.5.2	CRAN	standard	2.4.1
+RColorBrewer	~/R/library	1.1-3	NA	4.5.2	CRAN	standard	1.1-3
+Rcpp	~/R/library	1.1.0	NA	4.5.2	CRAN	standard	1.1.0
+RcppAnnoy	~/R/library	0.0.22	NA	4.5.2	CRAN	standard	0.0.22
+RcppArmadillo	~/R/library	15.2.3-1	NA	4.5.2	CRAN	standard	15.2.3-1
+RcppEigen	~/R/library	0.3.4.0.2	NA	4.5.2	CRAN	standard	0.3.4.0.2
+RcppHNSW	~/R/library	0.6.0	NA	4.5.2	CRAN	standard	0.6.0
+RcppML	~/R/library	0.3.7	NA	4.5.2	CRAN	NA	NA
+RcppParallel	~/R/library	5.1.11-1	NA	4.5.2	CRAN	standard	5.1.11-1
+RcppProgress	~/R/library	0.4.2	NA	4.5.2	CRAN	standard	0.4.2
+RcppThread	~/R/library	2.4.0	NA	4.5.2	CRAN	NA	NA
+RcppTOML	~/R/library	0.2.3	NA	4.5.2	CRAN	standard	0.2.3
+RCurl	~/R/library	1.98-1.17	NA	4.5.2	CRAN	NA	NA
+Rdpack	~/R/library	2.6.5	NA	4.5.2	CRAN	standard	2.6.5
+reformulas	~/R/library	0.4.3.1	NA	4.5.2	CRAN	standard	0.4.3.1
+registry	~/R/library	0.5-1	NA	4.5.2	CRAN	standard	0.5-1
+remotes	~/R/library	2.5.0	NA	4.5.2	CRAN	standard	2.5.0
+reshape2	~/R/library	1.4.5	NA	4.5.2	CRAN	standard	1.4.5
+restfulr	~/R/library	0.0.16	NA	4.5.2	CRAN	NA	NA
+reticulate	~/R/library	1.44.1	NA	4.5.2	CRAN	standard	1.44.1
+rex	~/R/library	1.2.1	NA	4.5.2	CRAN	standard	1.2.1
+rhdf5	~/R/library	2.54.1	NA	4.5.2	Bioconductor 3.22	NA	NA
+rhdf5filters	~/R/library	1.22.0	NA	4.5.2	Bioconductor 3.22	NA	NA
+Rhdf5lib	~/R/library	1.32.0	NA	4.5.2	Bioconductor 3.22	NA	NA
+Rhtslib	~/R/library	3.6.0	NA	4.5.2	Bioconductor 3.22	NA	NA
+rjson	~/R/library	0.2.23	NA	4.5.2	CRAN	NA	NA
+rlang	~/R/library	1.3.0	NA	4.5.2	CRAN	standard	1.3.0
+Rmagic	~/R/library	2.0.3.999	NA	4.5.2	NA	NA	NA
+rmarkdown	~/R/library	2.30	NA	4.5.2	CRAN	standard	2.30
+ROCR	~/R/library	1.0-11	NA	4.5.2	CRAN	standard	1.0-11
+rprojroot	~/R/library	2.1.1	NA	4.5.2	CRAN	standard	2.1.1
+Rsamtools	~/R/library	2.26.0	NA	4.5.2	Bioconductor 3.22	NA	NA
+RSpectra	~/R/library	0.16-2	NA	4.5.2	CRAN	standard	0.16-2
+RSQLite	~/R/library	2.4.5	NA	4.5.2	CRAN	NA	NA
+rstan	~/R/library	2.32.7	NA	4.5.2	CRAN	standard	2.32.7
+rstatix	~/R/library	1.1.0	NA	4.5.2	CRAN	standard	1.1.0
+rsvd	~/R/library	1.0.5	NA	4.5.2	CRAN	NA	NA
+rtracklayer	~/R/library	1.70.1	NA	4.5.2	Bioconductor 3.22	NA	NA
+Rtsne	~/R/library	0.17	NA	4.5.2	CRAN	standard	0.17
+rvest	~/R/library	1.0.5	NA	4.5.2	CRAN	NA	NA
+s2	~/R/library	1.1.9	NA	4.5.2	CRAN	standard	1.1.9
+S4Arrays	~/R/library	1.10.1	NA	4.5.2	Bioconductor 3.22	NA	NA
+S4Vectors	~/R/library	0.48.0	NA	4.5.2	Bioconductor 3.22	NA	NA
+S7	~/R/library	0.2.1	NA	4.5.2	CRAN	standard	0.2.1
+sandwich	~/R/library	3.1-1	NA	4.5.2	CRAN	standard	3.1-1
+sass	~/R/library	0.4.10	NA	4.5.2	CRAN	standard	0.4.10
+ScaledMatrix	~/R/library	1.18.0	NA	4.5.2	Bioconductor 3.22	NA	NA
+scales	~/R/library	1.4.0	NA	4.5.2	CRAN	standard	1.4.0
+scater	~/R/library	1.38.0	NA	4.5.2	Bioconductor 3.22	NA	NA
+scattermore	~/R/library	1.2	NA	4.5.2	CRAN	standard	1.2
+scDblFinder	~/R/library	1.24.0	NA	4.5.2	Bioconductor 3.22	NA	NA
+scGate	~/R/library	1.7.2	NA	4.5.2	CRAN	NA	NA
+scran	~/R/library	1.38.0	NA	4.5.2	Bioconductor 3.22	NA	NA
+scRepertoire	~/R/library	2.6.2	NA	4.5.2	Bioconductor 3.22	NA	NA
+sctransform	~/R/library	0.4.2	NA	4.5.2	CRAN	standard	0.4.2
+scuttle	~/R/library	1.20.0	NA	4.5.2	Bioconductor 3.22	NA	NA
+selectr	~/R/library	0.5-1	NA	4.5.2	CRAN	NA	NA
+Seqinfo	~/R/library	1.0.0	NA	4.5.2	Bioconductor 3.22	NA	NA
+seriation	~/R/library	1.5.8	NA	4.5.2	CRAN	standard	1.5.8
+Seurat	~/R/library	5.4.0	NA	4.5.2	CRAN	standard	5.4.0
+SeuratObject	~/R/library	5.3.0	NA	4.5.2	CRAN	standard	5.3.0
+sf	~/R/library	1.0-24	NA	4.5.2	CRAN	standard	1.0-24
+sfheaders	~/R/library	0.4.5	NA	4.5.2	CRAN	standard	0.4.5
+sfnetworks	~/R/library	0.6.5	NA	4.5.2	CRAN	standard	0.6.5
+shape	~/R/library	1.4.6.1	NA	4.5.2	CRAN	NA	NA
+shiny	~/R/library	1.12.1	NA	4.5.2	CRAN	standard	1.12.1
+SingleCellExperiment	~/R/library	1.32.0	NA	4.5.2	Bioconductor 3.22	NA	NA
+SingleR	~/R/library	2.12.0	NA	4.5.2	Bioconductor 3.22	NA	NA
+sitmo	~/R/library	2.0.2	NA	4.5.2	CRAN	standard	2.0.2
+snow	~/R/library	0.4-4	NA	4.5.2	CRAN	NA	NA
+SoupX	~/R/library	1.6.2	NA	4.5.2	CRAN	standard	1.6.2
+sourcetools	~/R/library	0.1.7-1	NA	4.5.2	CRAN	standard	0.1.7-1
+sp	~/R/library	2.2-0	NA	4.5.2	CRAN	standard	2.2-0
+spam	~/R/library	2.11-3	NA	4.5.2	CRAN	NA	NA
+SparseArray	~/R/library	1.10.8	NA	4.5.2	Bioconductor 3.22	NA	NA
+SparseM	~/R/library	1.84-2	NA	4.5.2	CRAN	standard	1.84-2
+sparseMatrixStats	~/R/library	1.22.0	NA	4.5.2	Bioconductor 3.22	NA	NA
+spatstat.data	~/R/library	3.1-9	NA	4.5.2	CRAN	standard	3.1-9
+spatstat.explore	~/R/library	3.6-0	NA	4.5.2	CRAN	standard	3.6-0
+spatstat.geom	~/R/library	3.6-1	NA	4.5.2	CRAN	standard	3.6-1
+spatstat.random	~/R/library	3.4-3	NA	4.5.2	CRAN	standard	3.4-3
+spatstat.sparse	~/R/library	3.1-0	NA	4.5.2	CRAN	standard	3.1-0
+spatstat.univar	~/R/library	3.1-5	NA	4.5.2	CRAN	standard	3.1-5
+spatstat.utils	~/R/library	3.2-0	NA	4.5.2	CRAN	standard	3.2-0
+spelling	~/R/library	2.3.2	NA	4.5.2	CRAN	standard	2.3.2
+STACAS	~/R/library	2.4.1	NA	4.5.2	NA	github	ea34e824e17df6316823db0a9b6322af0833e501
+StanHeaders	~/R/library	2.32.10	NA	4.5.2	CRAN	standard	2.32.10
+statmod	~/R/library	1.5.1	NA	4.5.2	CRAN	NA	NA
+statnet.common	~/R/library	4.13.0	NA	4.5.2	CRAN	standard	4.13.0
+stringdist	~/R/library	0.9.17	NA	4.5.2	CRAN	NA	NA
+stringi	~/R/library	1.8.7	NA	4.5.2	CRAN	standard	1.8.7
+stringr	~/R/library	1.6.0	NA	4.5.2	CRAN	standard	1.6.0
+SummarizedExperiment	~/R/library	1.40.0	NA	4.5.2	Bioconductor 3.22	NA	NA
+sys	~/R/library	3.4.3	NA	4.5.2	CRAN	standard	3.4.3
+systemfonts	~/R/library	1.3.1	NA	4.5.2	CRAN	standard	1.3.1
+TCRconvertR	~/R/library	1.0	NA	4.5.2	CRAN	standard	1.0
+tensor	~/R/library	1.5.1	NA	4.5.2	CRAN	standard	1.5.1
+tensorA	~/R/library	0.36.2.1	NA	4.5.2	CRAN	standard	0.36.2.1
+tensorflow	~/R/library	2.20.0	NA	4.5.2	CRAN	standard	2.20.0
+testthat	~/R/library	3.3.2	NA	4.5.2	CRAN	standard	3.3.2
+textshaping	~/R/library	1.0.4	NA	4.5.2	CRAN	NA	NA
+tfautograph	~/R/library	0.3.2	NA	4.5.2	CRAN	standard	0.3.2
+tfruns	~/R/library	1.5.4	NA	4.5.2	CRAN	standard	1.5.4
+TH.data	~/R/library	1.1-5	NA	4.5.2	CRAN	standard	1.1-5
+tibble	~/R/library	3.3.0	NA	4.5.2	CRAN	standard	3.3.0
+tidygraph	~/R/library	1.3.1	NA	4.5.2	CRAN	standard	1.3.1
+tidyr	~/R/library	1.3.2	NA	4.5.2	CRAN	standard	1.3.2
+tidyselect	~/R/library	1.2.1	NA	4.5.2	CRAN	standard	1.2.1
+timeDate	~/R/library	4052.112	NA	4.5.2	CRAN	standard	4052.112
+tinytex	~/R/library	0.58	NA	4.5.2	CRAN	standard	0.58
+transformr	~/R/library	0.1.5	NA	4.5.2	CRAN	standard	0.1.5
+Trex	~/R/library	0.99.12	NA	4.5.2	NA	github	7a26c2840c9c1d5023a762487b42247df6b2d307
+tseries	~/R/library	0.10-59	NA	4.5.2	CRAN	standard	0.10-59
+TSP	~/R/library	1.2.6	NA	4.5.2	CRAN	standard	1.2.6
+TTR	~/R/library	0.24.4	NA	4.5.2	CRAN	standard	0.24.4
+tweenr	~/R/library	2.0.3	NA	4.5.2	CRAN	standard	2.0.3
+UCell	~/R/library	2.14.0	NA	4.5.2	Bioconductor 3.22	NA	NA
+UCSC.utils	~/R/library	1.6.1	NA	4.5.2	Bioconductor 3.22	NA	NA
+umap	~/R/library	0.2.10.0	NA	4.5.2	CRAN	NA	NA
+units	~/R/library	1.0-0	NA	4.5.2	CRAN	standard	1.0-0
+UpSetR	~/R/library	1.4.1	NA	4.5.2	CRAN	standard	1.4.1
+urca	~/R/library	1.3-4	NA	4.5.2	CRAN	standard	1.3-4
+utf8	~/R/library	1.2.6	NA	4.5.2	CRAN	standard	1.2.6
+uwot	~/R/library	0.2.4	NA	4.5.2	CRAN	standard	0.2.4
+V8	~/R/library	8.0.1	NA	4.5.2	CRAN	NA	NA
+vctrs	~/R/library	0.7.3	NA	4.5.2	CRAN	standard	0.7.3
+vdiffr	~/R/library	1.0.8	NA	4.5.2	CRAN	standard	1.0.8
+vegan	~/R/library	2.7-2	NA	4.5.2	CRAN	standard	2.7-2
+venn	~/R/library	1.13	NA	4.5.2	CRAN	standard	1.13
+vipor	~/R/library	0.4.7	NA	4.5.2	CRAN	NA	NA
+viridis	~/R/library	0.6.5	NA	4.5.2	CRAN	standard	0.6.5
+viridisLite	~/R/library	0.4.2	NA	4.5.2	CRAN	standard	0.4.2
+waldo	~/R/library	0.6.2	NA	4.5.2	CRAN	standard	0.6.2
+withr	~/R/library	3.0.2	NA	4.5.2	CRAN	standard	3.0.2
+wk	~/R/library	0.9.5	NA	4.5.2	CRAN	standard	0.9.5
+xfun	~/R/library	0.55	NA	4.5.2	CRAN	standard	0.55
+xgboost	~/R/library	3.1.3.1	NA	4.5.2	CRAN	NA	NA
+XML	~/R/library	3.99-0.20	NA	4.5.2	CRAN	NA	NA
+xml2	~/R/library	1.5.2	NA	4.5.2	CRAN	standard	1.5.2
+xtable	~/R/library	1.8-4	NA	4.5.2	CRAN	standard	1.8-4
+xts	~/R/library	0.14.1	NA	4.5.2	CRAN	standard	0.14.1
+XVector	~/R/library	0.50.0	NA	4.5.2	Bioconductor 3.22	NA	NA
+yaml	~/R/library	2.3.12	NA	4.5.2	CRAN	standard	2.3.12
+zoo	~/R/library	1.8-15	NA	4.5.2	CRAN	standard	1.8-15
+abind	/usr/local/lib/R/site-library	1.4-8	NA	4.5.2	CRAN	NA	NA
+AnnotationDbi	/usr/local/lib/R/site-library	1.72.0	NA	4.5.2	Bioconductor 3.22	NA	NA
+ape	/usr/local/lib/R/site-library	5.8-1	NA	4.5.2	CRAN	NA	NA
+aplot	/usr/local/lib/R/site-library	0.3.2	NA	4.5.2	CRAN	NA	NA
+argparser	/usr/local/lib/R/site-library	0.7.3	NA	4.5.2	CRAN	NA	NA
+askpass	/usr/local/lib/R/site-library	1.2.1	NA	4.5.2	CRAN	NA	NA
+backports	/usr/local/lib/R/site-library	1.5.1	NA	4.5.2	CRAN	NA	NA
+base64enc	/usr/local/lib/R/site-library	0.1-6	NA	4.5.2	CRAN	NA	NA
+BH	/usr/local/lib/R/site-library	1.90.0-1	NA	4.5.2	CRAN	NA	NA
+Biobase	/usr/local/lib/R/site-library	2.70.0	NA	4.5.2	Bioconductor 3.22	NA	NA
+BiocGenerics	/usr/local/lib/R/site-library	0.56.0	NA	4.5.2	Bioconductor 3.22	NA	NA
+BiocManager	/usr/local/lib/R/site-library	1.30.27	NA	4.5.2	CRAN	NA	NA
+BiocParallel	/usr/local/lib/R/site-library	1.44.0	NA	4.5.2	Bioconductor 3.22	NA	NA
+BiocVersion	/usr/local/lib/R/site-library	3.22.0	NA	4.5.2	Bioconductor 3.22	NA	NA
+Biostrings	/usr/local/lib/R/site-library	2.78.0	NA	4.5.2	Bioconductor 3.22	NA	NA
+bit	/usr/local/lib/R/site-library	4.6.0	NA	4.5.2	CRAN	NA	NA
+bit64	/usr/local/lib/R/site-library	4.8.6	NA	4.5.2	CRAN	NA	NA
+blob	/usr/local/lib/R/site-library	1.3.0	NA	4.5.2	CRAN	NA	NA
+brew	/usr/local/lib/R/site-library	1.0-10	NA	4.5.2	CRAN	NA	NA
+brio	/usr/local/lib/R/site-library	1.1.5	NA	4.5.2	CRAN	NA	NA
+broom	/usr/local/lib/R/site-library	1.0.13	NA	4.5.2	CRAN	NA	NA
+bslib	/usr/local/lib/R/site-library	0.12.0	NA	4.5.2	CRAN	NA	NA
+cachem	/usr/local/lib/R/site-library	1.1.0	NA	4.5.2	CRAN	NA	NA
+callr	/usr/local/lib/R/site-library	3.8.0	NA	4.5.2	CRAN	NA	NA
+cellranger	/usr/local/lib/R/site-library	1.1.0	NA	4.5.2	CRAN	NA	NA
+cli	/usr/local/lib/R/site-library	3.6.6	NA	4.5.2	CRAN	NA	NA
+clipr	/usr/local/lib/R/site-library	0.8.1	NA	4.5.2	CRAN	NA	NA
+clusterProfiler	/usr/local/lib/R/site-library	4.18.4	NA	4.5.2	Bioconductor 3.22	NA	NA
+commonmark	/usr/local/lib/R/site-library	2.0.0	NA	4.5.2	CRAN	NA	NA
+conflicted	/usr/local/lib/R/site-library	1.2.0	NA	4.5.2	CRAN	NA	NA
+cowplot	/usr/local/lib/R/site-library	1.2.0	NA	4.5.2	CRAN	NA	NA
+cpp11	/usr/local/lib/R/site-library	0.5.5	NA	4.5.2	CRAN	NA	NA
+crayon	/usr/local/lib/R/site-library	1.5.3	NA	4.5.2	CRAN	NA	NA
+credentials	/usr/local/lib/R/site-library	2.0.3	NA	4.5.2	CRAN	NA	NA
+curl	/usr/local/lib/R/site-library	8.1.0	NA	4.5.2	CRAN	NA	NA
+data.table	/usr/local/lib/R/site-library	1.18.6.1	NA	4.5.2	CRAN	NA	NA
+DBI	/usr/local/lib/R/site-library	1.3.0	NA	4.5.2	CRAN	NA	NA
+dbplyr	/usr/local/lib/R/site-library	2.6.0	NA	4.5.2	CRAN	NA	NA
+DelayedArray	/usr/local/lib/R/site-library	0.36.1	NA	4.5.2	Bioconductor 3.22	NA	NA
+desc	/usr/local/lib/R/site-library	1.4.3	NA	4.5.2	CRAN	NA	NA
+DESeq2	/usr/local/lib/R/site-library	1.50.2	NA	4.5.2	Bioconductor 3.22	NA	NA
+devtools	/usr/local/lib/R/site-library	2.5.2	NA	4.5.2	CRAN	NA	NA
+diffobj	/usr/local/lib/R/site-library	0.3.9	NA	4.5.2	CRAN	NA	NA
+digest	/usr/local/lib/R/site-library	0.6.39	NA	4.5.2	CRAN	NA	NA
+docopt	/usr/local/lib/R/site-library	0.7.2	NA	4.5.2	RSPM	NA	NA
+DOSE	/usr/local/lib/R/site-library	4.4.0	NA	4.5.2	Bioconductor 3.22	NA	NA
+downlit	/usr/local/lib/R/site-library	0.4.5	NA	4.5.2	CRAN	NA	NA
+dplyr	/usr/local/lib/R/site-library	1.2.1	NA	4.5.2	CRAN	NA	NA
+dtplyr	/usr/local/lib/R/site-library	1.3.3	NA	4.5.2	CRAN	NA	NA
+edgeR	/usr/local/lib/R/site-library	4.8.2	NA	4.5.2	Bioconductor 3.22	NA	NA
+ellipsis	/usr/local/lib/R/site-library	0.3.3	NA	4.5.2	CRAN	NA	NA
+enrichplot	/usr/local/lib/R/site-library	1.30.5	NA	4.5.2	Bioconductor 3.22	NA	NA
+evaluate	/usr/local/lib/R/site-library	1.0.5	NA	4.5.2	CRAN	NA	NA
+fansi	/usr/local/lib/R/site-library	1.0.7	NA	4.5.2	CRAN	NA	NA
+farver	/usr/local/lib/R/site-library	2.1.2	NA	4.5.2	CRAN	NA	NA
+fastmap	/usr/local/lib/R/site-library	1.2.0	NA	4.5.2	CRAN	NA	NA
+fastmatch	/usr/local/lib/R/site-library	1.1-8	NA	4.5.2	CRAN	NA	NA
+fgsea	/usr/local/lib/R/site-library	1.36.2	NA	4.5.2	Bioconductor 3.22	NA	NA
+fontawesome	/usr/local/lib/R/site-library	0.5.3	NA	4.5.2	CRAN	NA	NA
+fontBitstreamVera	/usr/local/lib/R/site-library	0.1.1	NA	4.5.2	CRAN	NA	NA
+fontLiberation	/usr/local/lib/R/site-library	0.1.0	NA	4.5.2	CRAN	NA	NA
+fontquiver	/usr/local/lib/R/site-library	0.2.1	NA	4.5.2	CRAN	NA	NA
+forcats	/usr/local/lib/R/site-library	1.0.1	NA	4.5.2	CRAN	NA	NA
+formatR	/usr/local/lib/R/site-library	1.14	NA	4.5.2	CRAN	NA	NA
+fs	/usr/local/lib/R/site-library	2.1.0	NA	4.5.2	CRAN	NA	NA
+futile.logger	/usr/local/lib/R/site-library	1.4.9	NA	4.5.2	CRAN	NA	NA
+futile.options	/usr/local/lib/R/site-library	1.0.1	NA	4.5.2	CRAN	NA	NA
+gargle	/usr/local/lib/R/site-library	1.7.0	NA	4.5.2	CRAN	NA	NA
+gdtools	/usr/local/lib/R/site-library	0.5.2	NA	4.5.2	CRAN	NA	NA
+generics	/usr/local/lib/R/site-library	0.1.4	NA	4.5.2	CRAN	NA	NA
+GenomicRanges	/usr/local/lib/R/site-library	1.62.1	NA	4.5.2	Bioconductor 3.22	NA	NA
+gert	/usr/local/lib/R/site-library	2.5.0	NA	4.5.2	CRAN	NA	NA
+ggforce	/usr/local/lib/R/site-library	0.5.0	NA	4.5.2	CRAN	NA	NA
+ggfun	/usr/local/lib/R/site-library	0.2.2	NA	4.5.2	CRAN	NA	NA
+ggiraph	/usr/local/lib/R/site-library	0.9.6	NA	4.5.2	CRAN	NA	NA
+ggnewscale	/usr/local/lib/R/site-library	0.5.2	NA	4.5.2	CRAN	NA	NA
+ggplot2	/usr/local/lib/R/site-library	4.0.3	NA	4.5.2	CRAN	NA	NA
+ggplotify	/usr/local/lib/R/site-library	0.1.4	NA	4.5.2	CRAN	NA	NA
+ggrepel	/usr/local/lib/R/site-library	0.9.8	NA	4.5.2	CRAN	NA	NA
+ggtangle	/usr/local/lib/R/site-library	0.1.4	NA	4.5.2	CRAN	NA	NA
+ggtree	/usr/local/lib/R/site-library	4.0.5	NA	4.5.2	Bioconductor 3.22	NA	NA
+gh	/usr/local/lib/R/site-library	1.6.1	NA	4.5.2	CRAN	NA	NA
+git2r	/usr/local/lib/R/site-library	0.36.2	NA	4.5.2	CRAN	NA	NA
+gitcreds	/usr/local/lib/R/site-library	0.1.2	NA	4.5.2	CRAN	NA	NA
+glue	/usr/local/lib/R/site-library	1.8.1	NA	4.5.2	CRAN	NA	NA
+GO.db	/usr/local/lib/R/site-library	3.22.0	NA	4.5.2	NA	NA	NA
+googledrive	/usr/local/lib/R/site-library	2.2.0	NA	4.5.2	CRAN	NA	NA
+googlesheets4	/usr/local/lib/R/site-library	1.1.3	NA	4.5.2	CRAN	NA	NA
+GOSemSim	/usr/local/lib/R/site-library	2.36.0	NA	4.5.2	Bioconductor 3.22	NA	NA
+gridGraphics	/usr/local/lib/R/site-library	0.5-1	NA	4.5.2	CRAN	NA	NA
+gson	/usr/local/lib/R/site-library	0.2.2	NA	4.5.2	CRAN	NA	NA
+gtable	/usr/local/lib/R/site-library	0.3.6	NA	4.5.2	CRAN	NA	NA
+haven	/usr/local/lib/R/site-library	2.5.5	NA	4.5.2	CRAN	NA	NA
+here	/usr/local/lib/R/site-library	1.0.2	NA	4.5.2	CRAN	NA	NA
+highr	/usr/local/lib/R/site-library	0.12	NA	4.5.2	CRAN	NA	NA
+hms	/usr/local/lib/R/site-library	1.1.4	NA	4.5.2	CRAN	NA	NA
+htmltools	/usr/local/lib/R/site-library	0.5.9	NA	4.5.2	CRAN	NA	NA
+htmlwidgets	/usr/local/lib/R/site-library	1.6.4	NA	4.5.2	CRAN	NA	NA
+httpuv	/usr/local/lib/R/site-library	1.6.17	NA	4.5.2	CRAN	NA	NA
+httr	/usr/local/lib/R/site-library	1.4.9	NA	4.5.2	CRAN	NA	NA
+httr2	/usr/local/lib/R/site-library	1.3.0	NA	4.5.2	CRAN	NA	NA
+ids	/usr/local/lib/R/site-library	1.0.1	NA	4.5.2	CRAN	NA	NA
+igraph	/usr/local/lib/R/site-library	2.3.4	NA	4.5.2	CRAN	NA	NA
+ini	/usr/local/lib/R/site-library	0.3.1	NA	4.5.2	CRAN	NA	NA
+IRanges	/usr/local/lib/R/site-library	2.44.0	NA	4.5.2	Bioconductor 3.22	NA	NA
+isoband	/usr/local/lib/R/site-library	0.3.0	NA	4.5.2	CRAN	NA	NA
+janitor	/usr/local/lib/R/site-library	2.2.1	NA	4.5.2	CRAN	NA	NA
+jquerylib	/usr/local/lib/R/site-library	0.1.4	NA	4.5.2	CRAN	NA	NA
+jsonlite	/usr/local/lib/R/site-library	2.0.0	NA	4.5.2	CRAN	NA	NA
+KEGGREST	/usr/local/lib/R/site-library	1.50.0	NA	4.5.2	Bioconductor 3.22	NA	NA
+knitr	/usr/local/lib/R/site-library	1.52	NA	4.5.2	CRAN	NA	NA
+labeling	/usr/local/lib/R/site-library	0.4.3	NA	4.5.2	CRAN	NA	NA
+lambda.r	/usr/local/lib/R/site-library	1.2.6	NA	4.5.2	CRAN	NA	NA
+later	/usr/local/lib/R/site-library	1.4.8	NA	4.5.2	CRAN	NA	NA
+lazyeval	/usr/local/lib/R/site-library	0.2.3	NA	4.5.2	CRAN	NA	NA
+lifecycle	/usr/local/lib/R/site-library	1.0.5	NA	4.5.2	CRAN	NA	NA
+limma	/usr/local/lib/R/site-library	3.66.0	NA	4.5.2	Bioconductor 3.22	NA	NA
+littler	/usr/local/lib/R/site-library	0.3.22	NA	4.5.2	RSPM	NA	NA
+locfit	/usr/local/lib/R/site-library	1.5-9.12	NA	4.5.2	CRAN	NA	NA
+lubridate	/usr/local/lib/R/site-library	1.9.5	NA	4.5.2	CRAN	NA	NA
+magrittr	/usr/local/lib/R/site-library	2.0.5	NA	4.5.2	CRAN	NA	NA
+MatrixGenerics	/usr/local/lib/R/site-library	1.22.0	NA	4.5.2	Bioconductor 3.22	NA	NA
+matrixStats	/usr/local/lib/R/site-library	1.5.0	NA	4.5.2	CRAN	NA	NA
+memoise	/usr/local/lib/R/site-library	2.0.1	NA	4.5.2	CRAN	NA	NA
+mime	/usr/local/lib/R/site-library	0.13	NA	4.5.2	CRAN	NA	NA
+miniUI	/usr/local/lib/R/site-library	0.1.2	NA	4.5.2	CRAN	NA	NA
+mlflow	/usr/local/lib/R/site-library	3.10.1	NA	4.5.2	CRAN	NA	NA
+modelr	/usr/local/lib/R/site-library	0.1.11	NA	4.5.2	CRAN	NA	NA
+openssl	/usr/local/lib/R/site-library	2.4.2	NA	4.5.2	CRAN	NA	NA
+openxlsx	/usr/local/lib/R/site-library	4.2.9	NA	4.5.2	CRAN	NA	NA
+org.Hs.eg.db	/usr/local/lib/R/site-library	3.22.0	NA	4.5.2	NA	NA	NA
+otel	/usr/local/lib/R/site-library	0.2.0	NA	4.5.2	CRAN	NA	NA
+pak	/usr/local/lib/R/site-library	0.11.1	NA	4.5.2	CRAN	NA	NA
+patchwork	/usr/local/lib/R/site-library	1.3.2	NA	4.5.2	CRAN	NA	NA
+pillar	/usr/local/lib/R/site-library	1.11.1	NA	4.5.2	CRAN	NA	NA
+pkgbuild	/usr/local/lib/R/site-library	1.4.8	NA	4.5.2	CRAN	NA	NA
+pkgconfig	/usr/local/lib/R/site-library	2.0.3	NA	4.5.2	CRAN	NA	NA
+pkgdown	/usr/local/lib/R/site-library	2.2.1	NA	4.5.2	CRAN	NA	NA
+pkgload	/usr/local/lib/R/site-library	1.5.3	NA	4.5.2	CRAN	NA	NA
+plyr	/usr/local/lib/R/site-library	1.8.9	NA	4.5.2	CRAN	NA	NA
+png	/usr/local/lib/R/site-library	0.1-9	NA	4.5.2	CRAN	NA	NA
+polyclip	/usr/local/lib/R/site-library	1.10-7	NA	4.5.2	CRAN	NA	NA
+praise	/usr/local/lib/R/site-library	1.0.0	NA	4.5.2	CRAN	NA	NA
+prettyunits	/usr/local/lib/R/site-library	1.2.0	NA	4.5.2	CRAN	NA	NA
+processx	/usr/local/lib/R/site-library	3.9.0	NA	4.5.2	CRAN	NA	NA
+profvis	/usr/local/lib/R/site-library	0.4.0	NA	4.5.2	CRAN	NA	NA
+progress	/usr/local/lib/R/site-library	1.2.3	NA	4.5.2	CRAN	NA	NA
+promises	/usr/local/lib/R/site-library	1.5.0	NA	4.5.2	CRAN	NA	NA
+ps	/usr/local/lib/R/site-library	1.9.3	NA	4.5.2	CRAN	NA	NA
+purrr	/usr/local/lib/R/site-library	1.2.2	NA	4.5.2	CRAN	NA	NA
+qvalue	/usr/local/lib/R/site-library	2.42.0	NA	4.5.2	Bioconductor 3.22	NA	NA
+R.methodsS3	/usr/local/lib/R/site-library	1.8.2	NA	4.5.2	CRAN	NA	NA
+R.oo	/usr/local/lib/R/site-library	1.27.1	NA	4.5.2	CRAN	NA	NA
+R.utils	/usr/local/lib/R/site-library	2.13.0	NA	4.5.2	CRAN	NA	NA
+R6	/usr/local/lib/R/site-library	2.6.1	NA	4.5.2	CRAN	NA	NA
+ragg	/usr/local/lib/R/site-library	1.5.2	NA	4.5.2	CRAN	NA	NA
+rappdirs	/usr/local/lib/R/site-library	0.3.4	NA	4.5.2	CRAN	NA	NA
+rcmdcheck	/usr/local/lib/R/site-library	1.4.0	NA	4.5.2	CRAN	NA	NA
+RColorBrewer	/usr/local/lib/R/site-library	1.1-3	NA	4.5.2	CRAN	NA	NA
+Rcpp	/usr/local/lib/R/site-library	1.1.2	NA	4.5.2	CRAN	NA	NA
+RcppArmadillo	/usr/local/lib/R/site-library	15.6.2-1	NA	4.5.2	CRAN	NA	NA
+RcppTOML	/usr/local/lib/R/site-library	0.2.3	NA	4.5.2	CRAN	NA	NA
+rdtools	/usr/local/lib/R/site-library	0.1.0	NA	4.5.2	CRAN	NA	NA
+readr	/usr/local/lib/R/site-library	2.2.0	NA	4.5.2	CRAN	NA	NA
+readxl	/usr/local/lib/R/site-library	1.6.0	NA	4.5.2	CRAN	NA	NA
+rematch	/usr/local/lib/R/site-library	2.0.0	NA	4.5.2	CRAN	NA	NA
+rematch2	/usr/local/lib/R/site-library	2.1.2	NA	4.5.2	CRAN	NA	NA
+remotes	/usr/local/lib/R/site-library	2.5.0	NA	4.5.2	CRAN	NA	NA
+renv	/usr/local/lib/R/site-library	1.3.1	NA	4.5.2	CRAN	NA	NA
+reprex	/usr/local/lib/R/site-library	2.1.1	NA	4.5.2	CRAN	NA	NA
+reshape2	/usr/local/lib/R/site-library	1.4.5	NA	4.5.2	CRAN	NA	NA
+reticulate	/usr/local/lib/R/site-library	1.47.0	NA	4.5.2	CRAN	NA	NA
+rlang	/usr/local/lib/R/site-library	1.3.0	NA	4.5.2	CRAN	NA	NA
+rmarkdown	/usr/local/lib/R/site-library	2.32	NA	4.5.2	CRAN	NA	NA
+roxygen2	/usr/local/lib/R/site-library	8.1.1	NA	4.5.2	CRAN	NA	NA
+rprojroot	/usr/local/lib/R/site-library	2.1.1	NA	4.5.2	CRAN	NA	NA
+RSQLite	/usr/local/lib/R/site-library	3.53.3	NA	4.5.2	CRAN	NA	NA
+rstudioapi	/usr/local/lib/R/site-library	0.19.0	NA	4.5.2	CRAN	NA	NA
+rversions	/usr/local/lib/R/site-library	3.0.0	NA	4.5.2	CRAN	NA	NA
+rvest	/usr/local/lib/R/site-library	1.0.5	NA	4.5.2	CRAN	NA	NA
+S4Arrays	/usr/local/lib/R/site-library	1.10.1	NA	4.5.2	Bioconductor 3.22	NA	NA
+S4Vectors	/usr/local/lib/R/site-library	0.48.1	NA	4.5.2	Bioconductor 3.22	NA	NA
+S7	/usr/local/lib/R/site-library	0.2.2	NA	4.5.2	CRAN	NA	NA
+sass	/usr/local/lib/R/site-library	0.4.10	NA	4.5.2	CRAN	NA	NA
+scales	/usr/local/lib/R/site-library	1.4.0	NA	4.5.2	CRAN	NA	NA
+scatterpie	/usr/local/lib/R/site-library	0.2.6	NA	4.5.2	CRAN	NA	NA
+selectr	/usr/local/lib/R/site-library	0.8-0	NA	4.5.2	CRAN	NA	NA
+Seqinfo	/usr/local/lib/R/site-library	1.0.0	NA	4.5.2	Bioconductor 3.22	NA	NA
+sessioninfo	/usr/local/lib/R/site-library	1.2.4	NA	4.5.2	CRAN	NA	NA
+shiny	/usr/local/lib/R/site-library	1.14.0	NA	4.5.2	CRAN	NA	NA
+snakecase	/usr/local/lib/R/site-library	0.11.1	NA	4.5.2	CRAN	NA	NA
+snow	/usr/local/lib/R/site-library	0.4-4	NA	4.5.2	CRAN	NA	NA
+sourcetools	/usr/local/lib/R/site-library	0.1.7-2	NA	4.5.2	CRAN	NA	NA
+SparseArray	/usr/local/lib/R/site-library	1.10.10	NA	4.5.2	Bioconductor 3.22	NA	NA
+statmod	/usr/local/lib/R/site-library	1.5.2	NA	4.5.2	CRAN	NA	NA
+stringi	/usr/local/lib/R/site-library	1.8.9	NA	4.5.2	CRAN	NA	NA
+stringr	/usr/local/lib/R/site-library	1.6.0	NA	4.5.2	CRAN	NA	NA
+SummarizedExperiment	/usr/local/lib/R/site-library	1.40.0	NA	4.5.2	Bioconductor 3.22	NA	NA
+swagger	/usr/local/lib/R/site-library	5.32.1	NA	4.5.2	CRAN	NA	NA
+sys	/usr/local/lib/R/site-library	3.4.3	NA	4.5.2	CRAN	NA	NA
+systemfonts	/usr/local/lib/R/site-library	1.3.2	NA	4.5.2	CRAN	NA	NA
+testthat	/usr/local/lib/R/site-library	3.3.2	NA	4.5.2	CRAN	NA	NA
+textshaping	/usr/local/lib/R/site-library	1.0.5	NA	4.5.2	CRAN	NA	NA
+tibble	/usr/local/lib/R/site-library	3.3.1	NA	4.5.2	CRAN	NA	NA
+tidydr	/usr/local/lib/R/site-library	0.0.7	NA	4.5.2	CRAN	NA	NA
+tidyr	/usr/local/lib/R/site-library	1.3.2	NA	4.5.2	CRAN	NA	NA
+tidyselect	/usr/local/lib/R/site-library	1.2.1	NA	4.5.2	CRAN	NA	NA
+tidytree	/usr/local/lib/R/site-library	0.4.8	NA	4.5.2	CRAN	NA	NA
+tidyverse	/usr/local/lib/R/site-library	2.0.0	NA	4.5.2	CRAN	NA	NA
+timechange	/usr/local/lib/R/site-library	0.4.0	NA	4.5.2	CRAN	NA	NA
+tinytex	/usr/local/lib/R/site-library	0.61	NA	4.5.2	CRAN	NA	NA
+treeio	/usr/local/lib/R/site-library	1.34.0	NA	4.5.2	Bioconductor 3.22	NA	NA
+tweenr	/usr/local/lib/R/site-library	2.0.3	NA	4.5.2	CRAN	NA	NA
+tzdb	/usr/local/lib/R/site-library	0.5.0	NA	4.5.2	CRAN	NA	NA
+urlchecker	/usr/local/lib/R/site-library	2.0.0	NA	4.5.2	CRAN	NA	NA
+usethis	/usr/local/lib/R/site-library	3.2.2	NA	4.5.2	CRAN	NA	NA
+utf8	/usr/local/lib/R/site-library	1.2.6	NA	4.5.2	CRAN	NA	NA
+uuid	/usr/local/lib/R/site-library	1.2-2	NA	4.5.2	CRAN	NA	NA
+vctrs	/usr/local/lib/R/site-library	0.7.3	NA	4.5.2	CRAN	NA	NA
+viridisLite	/usr/local/lib/R/site-library	0.4.3	NA	4.5.2	CRAN	NA	NA
+vroom	/usr/local/lib/R/site-library	1.7.1	NA	4.5.2	CRAN	NA	NA
+waldo	/usr/local/lib/R/site-library	0.6.2	NA	4.5.2	CRAN	NA	NA
+whisker	/usr/local/lib/R/site-library	0.4.1	NA	4.5.2	CRAN	NA	NA
+withr	/usr/local/lib/R/site-library	3.0.3	NA	4.5.2	CRAN	NA	NA
+writexl	/usr/local/lib/R/site-library	2.0.1	NA	4.5.2	CRAN	NA	NA
+xfun	/usr/local/lib/R/site-library	0.62	NA	4.5.2	CRAN	NA	NA
+xml2	/usr/local/lib/R/site-library	1.6.0	NA	4.5.2	CRAN	NA	NA
+xopen	/usr/local/lib/R/site-library	1.0.1	NA	4.5.2	CRAN	NA	NA
+xtable	/usr/local/lib/R/site-library	1.8-8	NA	4.5.2	CRAN	NA	NA
+XVector	/usr/local/lib/R/site-library	0.50.0	NA	4.5.2	Bioconductor 3.22	NA	NA
+yaml	/usr/local/lib/R/site-library	2.3.12	NA	4.5.2	CRAN	NA	NA
+yulab.utils	/usr/local/lib/R/site-library	0.2.5	NA	4.5.2	CRAN	NA	NA
+zeallot	/usr/local/lib/R/site-library	0.2.0	NA	4.5.2	CRAN	NA	NA
+zip	/usr/local/lib/R/site-library	3.0.2	NA	4.5.2	CRAN	NA	NA
+base	/usr/local/lib/R/library	4.5.2	base	4.5.2	NA	NA	NA
+boot	/usr/local/lib/R/library	1.3-32	recommended	4.5.2	CRAN	NA	NA
+class	/usr/local/lib/R/library	7.3-23	recommended	4.5.2	CRAN	NA	NA
+cluster	/usr/local/lib/R/library	2.1.8.1	recommended	4.5.2	CRAN	NA	NA
+codetools	/usr/local/lib/R/library	0.2-20	recommended	4.5.2	CRAN	NA	NA
+compiler	/usr/local/lib/R/library	4.5.2	base	4.5.2	NA	NA	NA
+datasets	/usr/local/lib/R/library	4.5.2	base	4.5.2	NA	NA	NA
+foreign	/usr/local/lib/R/library	0.8-90	recommended	4.5.2	CRAN	NA	NA
+graphics	/usr/local/lib/R/library	4.5.2	base	4.5.2	NA	NA	NA
+grDevices	/usr/local/lib/R/library	4.5.2	base	4.5.2	NA	NA	NA
+grid	/usr/local/lib/R/library	4.5.2	base	4.5.2	NA	NA	NA
+KernSmooth	/usr/local/lib/R/library	2.23-26	recommended	4.5.2	CRAN	NA	NA
+lattice	/usr/local/lib/R/library	0.22-7	recommended	4.5.2	CRAN	NA	NA
+MASS	/usr/local/lib/R/library	7.3-65	recommended	4.5.2	CRAN	NA	NA
+Matrix	/usr/local/lib/R/library	1.7-4	recommended	4.5.2	CRAN	NA	NA
+methods	/usr/local/lib/R/library	4.5.2	base	4.5.2	NA	NA	NA
+mgcv	/usr/local/lib/R/library	1.9-3	recommended	4.5.2	CRAN	NA	NA
+nlme	/usr/local/lib/R/library	3.1-168	recommended	4.5.2	CRAN	NA	NA
+nnet	/usr/local/lib/R/library	7.3-20	recommended	4.5.2	CRAN	NA	NA
+parallel	/usr/local/lib/R/library	4.5.2	base	4.5.2	NA	NA	NA
+rpart	/usr/local/lib/R/library	4.1.24	recommended	4.5.2	CRAN	NA	NA
+spatial	/usr/local/lib/R/library	7.3-18	recommended	4.5.2	CRAN	NA	NA
+splines	/usr/local/lib/R/library	4.5.2	base	4.5.2	NA	NA	NA
+stats	/usr/local/lib/R/library	4.5.2	base	4.5.2	NA	NA	NA
+stats4	/usr/local/lib/R/library	4.5.2	base	4.5.2	NA	NA	NA
+survival	/usr/local/lib/R/library	3.8-3	recommended	4.5.2	CRAN	NA	NA
+tcltk	/usr/local/lib/R/library	4.5.2	base	4.5.2	NA	NA	NA
+tools	/usr/local/lib/R/library	4.5.2	base	4.5.2	NA	NA	NA
+utils	/usr/local/lib/R/library	4.5.2	base	4.5.2	NA	NA	NA

@@ -1,7 +1,7 @@
 # --- Configure Python environment and verify MAGIC availability ---
 library(reticulate)
 reticulate::use_python(
-  "/mnt/bioinfnas/immuno/eprieto/Rmagic/miniforge3/envs/magic_env/bin/python",
+  Sys.getenv("MAGIC_PYTHON", "/mnt/bioinfnas/immuno/eprieto/Rmagic/miniforge3/envs/magic_env/bin/python"),
   required = TRUE
 )
 py_config()

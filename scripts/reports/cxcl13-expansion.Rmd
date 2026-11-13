@@ -1,0 +1,313 @@
+---
+title: "Expansion of the CD4_CXCL13 TIL clonotypes and differences between expanded and non-expanded cells"
+author: "Endika Prieto <endikaprieto@vhio.net>"
+date: "2026-11-13"
+---
+
+# setup
+
+For each patient, takes the TCR clonotypes of the TIL cells that fall in one cluster of the TIL single-cell data
+(`CD4_CXCL13`), classifies them by their behaviour in the deep TCR beta sequencing repertoires (frequency in PE,
+the primary expansion, compared with Bulk) and then compares the cells of the two groups: differentially expressed
+genes (DEG, RNA) and proteins (DEP, CITE-seq antibodies).
+
+Classification of a clonotype (`classification <- "pe_vs_bulk"`):
+
+- **Expanded**: frequency in PE higher than in Bulk (any increase).
+- **Not expanded**: detected in Bulk, with a frequency in PE equal or lower.
+- **Not detected in PE or Bulk**: productive clonotype of the TCRb-seq table of the patient, absent from both.
+- **Not in TCRb-seq**: beta chain (CDR3 nucleotide sequence + TRBJ) absent from the TCRb-seq table of the patient.
+- **Not classifiable**: the patient has no PE or no Bulk repertoire.
+
+A classification stored in the metadata of the TIL object can be used instead (`classification <- "metadata"`
+and `metadata_class_column`); the object in `til-data/` has no such column at the moment.
+
+Outputs in `patients/cd4-cxcl13-expansion/`: clonotype list, summary per patient, DEG and DEP tables, and an
+interactive HTML report.
+
+The TIL object is large (2.4 GB on disk): run this on a compute node, not on the front end.
+
+```{r, warning=FALSE, message=FALSE}
+# --- Define paths ---
+# R is started in renv-sturcotte/ (scripts/interactive-R.sh), so ".." is the project folder
+project_dir <- normalizePath("..", mustWork = TRUE)
+datapath <- file.path(project_dir, "patients")
+til_file <- file.path(project_dir, "til-data", "cite1_2_3_4_5_6_8_withoutPat400304_TCR_ADT_virus_singlets.rds")
+bulk_file <- file.path(datapath, "clonotypes_adaptive_bulk_productivefreqs_update.rds")   # same file as in petasan .../sturcotte/tcrb/
+template_file <- file.path(project_dir, "scripts", "reports", "cxcl13-expansion-template.html")
+output_dir <- file.path(datapath, "cd4-cxcl13-expansion")
+dir.create(output_dir, recursive = TRUE, showWarnings = FALSE)
+# --- Parameters ---
+cluster_column <- "clusters_old"
+cluster_name <- "CD4_CXCL13"
+classification <- "pe_vs_bulk"      # "pe_vs_bulk" or "metadata"
+metadata_class_column <- NULL       # column of the TIL metadata with a clonotype class, for classification "metadata"
+til_reduction <- "umap.cca"
+patients_use <- NULL                # NULL = the patients of the UMAP viewer (those with a prioritization table); or e.g. c("CHUM_3513")
+min_cells_patient <- 3              # cells per group needed for a patient to count in the per-patient direction check
+min_cells_pooled <- 10              # cells per group needed to test all the patients together
+min_cells_single <- 5               # cells per group needed to test one patient on its own
+padj_cutoff <- 0.05
+coord_quant <- 4095L
+# --- Load libraries ---
+library(Seurat)
+library(jsonlite)
+set.seed(123)
+```
+
+# load
+
+```{r}
+obj <- readRDS(til_file)
+md <- obj[[]]
+emb <- Embeddings(obj, reduction = til_reduction)[rownames(md), 1:2]
+bulk <- readRDS(bulk_file)
+# --- Keep the patients of the analysis ---
+if (is.null(patients_use)) {
+  tables <- list.files(datapath, pattern = "^prioritized_.*_tcrs_for_validation\\.tsv$", recursive = TRUE)
+  patients_use <- sort(unique(paste0("CHUM_", sub("^pt", "", sub("/.*$", "", tables)))))
+}
+stopifnot(length(patients_use) > 0, all(patients_use %in% md$patient_id))
+obj <- subset(obj, cells = rownames(md)[md$patient_id %in% patients_use])
+md <- obj[[]]
+emb <- emb[rownames(md), , drop = FALSE]
+cat("Patients:", paste(patients_use, collapse = ", "), "| TIL cells:", nrow(md), "\n")
+stopifnot(all(c("patient_id", "subset_id", "clonotype", "cdr3_j", cluster_column) %in% colnames(md)),
+          cluster_name %in% md[[cluster_column]])
+in_cluster <- md[[cluster_column]] == cluster_name
+cat(cluster_name, "cells:", sum(in_cluster), "| with a TCR:", sum(in_cluster & !is.na(md$cdr3_j)), "\n")
+table(md$patient_id[in_cluster], with_TCR = !is.na(md$cdr3_j[in_cluster]))
+```
+
+# classify
+
+One row per clonotype with at least one cell in the cluster, per patient. The TCRb-seq frequencies are those of
+the productive clonotype with the same beta chain (CDR3 nucleotide sequence + TRBJ).
+
+```{r}
+class_levels <- c("Expanded", "Not expanded", "Not detected in PE or Bulk", "Not in TCRb-seq", "Not classifiable")
+repertoires <- c(Tumor = "tumor", Blood = "blood", PE = "PE", Bulk = "bulk", TIDAL01 = "TIDAL01")
+clonotypes <- do.call(rbind, lapply(sort(unique(md$patient_id[in_cluster])), function(patient) {
+  cells_patient <- md$patient_id == patient & !is.na(md$cdr3_j)
+  cells <- cells_patient & in_cluster
+  if (!any(cells)) {
+    return(NULL)
+  }
+  keys <- names(sort(table(md$cdr3_j[cells]), decreasing = TRUE))
+  first <- match(keys, md$cdr3_j[cells])
+  out <- data.frame(
+    patient = patient,
+    clonotype = md$clonotype[cells][first],
+    cdr3_aa = md$tcr_cdr3_aa[cells][first],
+    cdr3_j = keys,
+    cells_in_cluster = as.integer(table(md$cdr3_j[cells])[keys]),
+    cells_in_TILs = as.integer(table(md$cdr3_j[cells_patient])[keys]),
+    cells_PD1p = as.integer(table(factor(md$cdr3_j[cells & md$subset_id == "PD1p"], levels = keys))),
+    cells_PD1d = as.integer(table(factor(md$cdr3_j[cells & md$subset_id == "PD1d"], levels = keys)))
+  )
+  bulk_pt <- bulk[[patient]]
+  has_repertoire <- function(x) !is.null(bulk_pt) && sum(bulk_pt[[x]][bulk_pt$productive == "yes"], na.rm = TRUE) > 0
+  if (!is.null(bulk_pt)) {
+    productive <- bulk_pt[bulk_pt$productive == "yes" & !duplicated(bulk_pt$cdr3_j), ]
+    hit <- match(keys, productive$cdr3_j)
+    for (name in names(repertoires)) {
+      out[[paste0(name, "_freq")]] <- if (has_repertoire(repertoires[[name]])) productive[[repertoires[[name]]]][hit] else NA_real_
+    }
+    out$in_TCRb_seq <- !is.na(hit)
+  } else {
+    for (name in names(repertoires)) out[[paste0(name, "_freq")]] <- NA_real_
+    out$in_TCRb_seq <- FALSE
+  }
+  out$class <- if (!has_repertoire("PE") || !has_repertoire("bulk")) {
+    "Not classifiable"
+  } else {
+    ifelse(!out$in_TCRb_seq, "Not in TCRb-seq",
+      ifelse(out$PE_freq > out$Bulk_freq, "Expanded",
+        ifelse(out$Bulk_freq > 0, "Not expanded", "Not detected in PE or Bulk")))
+  }
+  out
+}))
+# --- Optional: classification taken from the metadata of the TIL object ---
+if (classification == "metadata") {
+  stopifnot(!is.null(metadata_class_column), metadata_class_column %in% colnames(md))
+  key <- paste(md$patient_id, md$cdr3_j)
+  classes <- tapply(as.character(md[[metadata_class_column]]), key, function(x) names(sort(table(x), decreasing = TRUE))[1])
+  clonotypes$class_pe_vs_bulk <- clonotypes$class
+  clonotypes$class <- unname(classes[paste(clonotypes$patient, clonotypes$cdr3_j)])
+  class_levels <- unique(c(class_levels, stats::na.omit(clonotypes$class)))
+}
+clonotypes$log2_PE_vs_Bulk <- ifelse(clonotypes$PE_freq > 0 & clonotypes$Bulk_freq > 0,
+                                     round(log2(clonotypes$PE_freq / clonotypes$Bulk_freq), 2), NA_real_)
+clonotypes$class <- factor(clonotypes$class, levels = class_levels)
+# --- Summary per patient: clonotypes and cells of the cluster in each class ---
+summary_clonotypes <- as.data.frame.matrix(table(clonotypes$patient, clonotypes$class))
+summary_cells <- as.data.frame.matrix(xtabs(cells_in_cluster ~ patient + class, clonotypes))
+cat("Clonotypes per class:\n")
+print(cbind(summary_clonotypes, Total = rowSums(summary_clonotypes)))
+cat("Cells of the cluster per class:\n")
+print(cbind(summary_cells, Total = rowSums(summary_cells)))
+```
+
+# deg / dep
+
+Cells of the cluster, grouped by the class of their clonotype. Two comparisons:
+
+- **strict**: Expanded vs Not expanded.
+- **broad**: Expanded vs Not expanded + Not detected in PE or Bulk (every classified clonotype that does not expand).
+
+Each comparison is run on the cells of all the patients together and on each patient separately (when it has
+at least `min_cells_single` cells in both groups). Wilcoxon rank-sum test (Seurat `FindMarkers`): RNA on log-normalized
+counts, without TCR, mitochondrial and ribosomal genes; protein on the normalized ADT values, without isotype
+controls. Because the patients contribute differently to each group, every feature also gets the number of
+patients (with at least `min_cells_patient` cells in both groups) in which the difference goes in the same
+direction as in the pooled test.
+
+```{r, warning=FALSE}
+cell_class <- clonotypes$class[match(paste(md$patient_id, md$cdr3_j), paste(clonotypes$patient, clonotypes$cdr3_j))]
+cell_class[!in_cluster] <- NA
+sub <- subset(obj, cells = rownames(md)[!is.na(cell_class)])
+sub$expansion_class <- as.character(cell_class[!is.na(cell_class)])
+rm(obj)
+invisible(gc())
+DefaultAssay(sub) <- "RNA"
+sub <- NormalizeData(sub, verbose = FALSE)
+exclude_pattern <- "^(TR[ABDG][VJCD]|MT-|RPL|MRPL|MRPS|RPS(?!6K))"
+genes_keep <- rownames(sub[["RNA"]])[!grepl(exclude_pattern, rownames(sub[["RNA"]]), perl = TRUE)]
+proteins_keep <- rownames(sub[["ADT"]])[!grepl("isotype", rownames(sub[["ADT"]]), ignore.case = TRUE)]
+comparisons <- list(
+  strict = list(group_1 = "Expanded", group_2 = "Not expanded"),
+  broad = list(group_1 = "Expanded", group_2 = c("Not expanded", "Not detected in PE or Bulk"))
+)
+compare <- function(assay, features, comparison, min.pct, patient = NULL) {
+  in_scope <- if (is.null(patient)) rep(TRUE, ncol(sub)) else sub$patient_id == patient
+  cells_1 <- colnames(sub)[in_scope & sub$expansion_class %in% comparison$group_1]
+  cells_2 <- colnames(sub)[in_scope & sub$expansion_class %in% comparison$group_2]
+  if (min(length(cells_1), length(cells_2)) < (if (is.null(patient)) min_cells_pooled else min_cells_single)) {
+    return(NULL)
+  }
+  res <- FindMarkers(sub, ident.1 = cells_1, ident.2 = cells_2, assay = assay, features = features,
+                     test.use = "wilcox", logfc.threshold = 0, min.pct = min.pct, verbose = FALSE)
+  data <- LayerData(sub, assay = assay, layer = "data")[rownames(res), , drop = FALSE]
+  res$feature <- rownames(res)
+  res$mean_1 <- Matrix::rowMeans(data[, cells_1, drop = FALSE])
+  res$mean_2 <- Matrix::rowMeans(data[, cells_2, drop = FALSE])
+  res$difference <- res$mean_1 - res$mean_2
+  # --- Direction of the difference within each patient ---
+  tested <- same <- integer(nrow(res))
+  for (one in unique(sub$patient_id)) {
+    p1 <- cells_1[sub$patient_id[match(cells_1, colnames(sub))] == one]
+    p2 <- cells_2[sub$patient_id[match(cells_2, colnames(sub))] == one]
+    if (length(p1) >= min_cells_patient && length(p2) >= min_cells_patient) {
+      d <- Matrix::rowMeans(data[, p1, drop = FALSE]) - Matrix::rowMeans(data[, p2, drop = FALSE])
+      tested <- tested + 1L
+      same <- same + as.integer(sign(d) == sign(res$difference) & d != 0)
+    }
+  }
+  res$patients_tested <- tested
+  res$patients_same_direction <- same
+  res$cells_1 <- length(cells_1)
+  res$cells_2 <- length(cells_2)
+  fc_column <- grep("^avg_", colnames(res), value = TRUE)[1]
+  res$effect <- res[[fc_column]]
+  res$effect_name <- fc_column
+  res[order(res$p_val), c("feature", "effect", "effect_name", "difference", "mean_1", "mean_2", "pct.1", "pct.2", "p_val", "p_val_adj",
+                          "patients_same_direction", "patients_tested", "cells_1", "cells_2")]
+}
+# --- Results are named "<DEG|DEP>_<comparison>|<all or patient>" ---
+results <- list()
+for (name in names(comparisons)) {
+  for (scope in c("all", patients_use)) {
+    patient <- if (scope == "all") NULL else scope
+    results[paste0("DEG_", name, "|", scope)] <- list(compare("RNA", genes_keep, comparisons[[name]], min.pct = 0.1, patient = patient))
+    results[paste0("DEP_", name, "|", scope)] <- list(compare("ADT", proteins_keep, comparisons[[name]], min.pct = 0, patient = patient))
+  }
+}
+results_summary <- do.call(rbind, lapply(names(results), function(name) {
+  res <- results[[name]]
+  data.frame(
+    result = name,
+    cells_1 = if (is.null(res)) NA else res$cells_1[1],
+    cells_2 = if (is.null(res)) NA else res$cells_2[1],
+    tested = if (is.null(res)) NA else nrow(res),
+    higher_in_expanded = if (is.null(res)) NA else sum(res$p_val_adj < padj_cutoff & res$difference > 0),
+    lower_in_expanded = if (is.null(res)) NA else sum(res$p_val_adj < padj_cutoff & res$difference < 0)
+  )
+}))
+print(results_summary, row.names = FALSE)
+for (name in grep("\\|all$", names(results), value = TRUE)) {
+  if (is.null(results[[name]])) next
+  cat("\n", name, "\n")
+  print(head(results[[name]][, c("feature", "effect", "pct.1", "pct.2", "p_val_adj", "patients_same_direction", "patients_tested")], 12), row.names = FALSE)
+}
+```
+
+# save
+
+```{r}
+write_tsv <- function(x, file) write.table(x, file.path(output_dir, file), sep = "\t", dec = ",", row.names = FALSE, quote = FALSE)
+write_tsv(clonotypes[order(clonotypes$patient, clonotypes$class, -clonotypes$cells_in_cluster), ], "CD4_CXCL13_clonotypes.tsv")
+write_tsv(cbind(patient = rownames(summary_clonotypes), summary_clonotypes), "CD4_CXCL13_clonotypes_per_class.tsv")
+write_tsv(cbind(patient = rownames(summary_cells), summary_cells), "CD4_CXCL13_cells_per_class.tsv")
+for (name in names(results)) {
+  if (!is.null(results[[name]])) write_tsv(results[[name]], paste0("CD4_CXCL13_", sub("\\|all$", "", sub("\\|(CHUM_.*)$", "_\\1", name)), ".tsv"))
+}
+write_tsv(results_summary, "CD4_CXCL13_DEG_DEP_summary.tsv")
+list.files(output_dir)
+```
+
+# html
+
+Interactive report: the data are embedded as JSON in `scripts/reports/cxcl13-expansion-template.html`.
+
+```{r}
+if (file.exists(template_file)) {
+  quantize <- function(v) {
+    rng <- range(v)
+    as.integer(round((v - rng[1]) / (rng[2] - rng[1]) * coord_quant))
+  }
+  class_all <- match(as.character(cell_class), class_levels) - 1L
+  class_all[is.na(class_all)] <- -1L
+  report <- list(
+    generated = format(Sys.Date()),
+    cluster = cluster_name,
+    classification = if (classification == "metadata") paste0("metadata column ", metadata_class_column) else "PE vs Bulk (TCRb-seq)",
+    classes = I(class_levels),
+    quant = coord_quant,
+    padj_cutoff = padj_cutoff,
+    patients = I(sort(unique(md$patient_id))),
+    umap = list(
+      x = quantize(emb[, 1]),
+      y = quantize(emb[, 2]),
+      patient = match(md$patient_id, sort(unique(md$patient_id))) - 1L,
+      in_cluster = as.integer(in_cluster),
+      class = class_all
+    ),
+    clonotypes = list(
+      columns = I(colnames(clonotypes)),
+      rows = lapply(seq_len(nrow(clonotypes)), function(i) {
+        lapply(clonotypes[i, ], function(v) if (is.factor(v)) as.character(v) else if (is.numeric(v) && !is.na(v)) signif(v, 4) else v)
+      })
+    ),
+    comparisons = lapply(comparisons, function(x) list(group_1 = paste(x$group_1, collapse = " + "), group_2 = paste(x$group_2, collapse = " + "))),
+    results = lapply(results, function(res) {
+      if (is.null(res)) return(NULL)
+      list(
+        effect_name = res$effect_name[1], cells_1 = res$cells_1[1], cells_2 = res$cells_2[1],
+        feature = res$feature, effect = round(res$effect, 3), difference = signif(res$difference, 3),
+        pct_1 = res$pct.1, pct_2 = res$pct.2, p = signif(res$p_val, 3), padj = signif(res$p_val_adj, 3),
+        same = res$patients_same_direction, tested = res$patients_tested
+      )
+    })
+  )
+  json <- gsub("</", "<\\/", jsonlite::toJSON(report, auto_unbox = TRUE, na = "null", digits = NA, null = "null"), fixed = TRUE)
+  parts <- strsplit(paste(readLines(template_file, warn = FALSE, encoding = "UTF-8"), collapse = "\n"), "/*__DATA__*/", fixed = TRUE)[[1]]
+  stopifnot(length(parts) == 2)
+  output_file <- file.path(output_dir, "CD4_CXCL13_expansion_report.html")
+  con <- file(output_file, open = "wb")
+  writeLines(c(parts[1], json, parts[2]), con, sep = "", useBytes = TRUE)
+  close(con)
+  cat("Written:", output_file, "(", round(file.size(output_file) / 1024^2, 1), "MB )\n")
+} else {
+  message("Template not found, HTML report skipped: ", template_file)
+}
+```

@@ -1,1 +1,33 @@
-deconv-analysis_pt3328_pt3513.Rmd
+# Whitelist: ignore everything, then re-include what is tracked
+/*
+!/.gitignore
+!/README.md
+!/LICENSE
+
+# Analysis code
+!/scripts/
+# Variant of deconv-analysis.Rmd for the patients without raw V(D)J data (kept local)
+/scripts/deconvolution/deconv-analysis_pt3328_pt3513.Rmd
+
+# Setup: functions and environment locks. ProjecTILs references, the MAGIC clone and installers are not tracked
+!/setup/
+/setup/refs/
+/setup/MAGIC/
+/setup/*.sh
+
+# renv: lockfile + bootstrap files (the library is restored with renv::restore())
+!/renv-sturcotte/
+/renv-sturcotte/*
+!/renv-sturcotte/.Rprofile
+!/renv-sturcotte/renv.lock
+!/renv-sturcotte/renv/
+/renv-sturcotte/renv/*
+!/renv-sturcotte/renv/activate.R
+!/renv-sturcotte/renv/settings.json
+!/renv-sturcotte/renv/.gitignore
+
+# Not tracked: patients/ (outputs and reports), til-data/ (TIL single-cell object), logs/
+
+.Rhistory
+.RData
+.Rproj.user/
