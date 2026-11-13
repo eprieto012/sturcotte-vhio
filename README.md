@@ -71,7 +71,7 @@ export MAGIC_PYTHON="$PWD/envs/magic_env/bin/python"
 sbatch -p long -c 24 --mem=64G -t 48:00:00 setup/env-lock/renv-restore.sh
 ```
 
-`scripts/interactive-R.sh` puts the conda R first on `PATH`, unsets `R_LIBS*` and starts R from `renv-sturcotte/`, whose `.Rprofile` activates renv, so only the renv library is used. Always start R through it; the scripts locate the project as the parent of that folder. To check the environment:
+`scripts/interactive-R.sh` puts the conda R first on `PATH`, unsets `R_LIBS*` and starts R from `renv-sturcotte/`, whose `.Rprofile` activates renv, so only the renv library is used. Always start R through it. The scripts find the project folder by walking up from the working directory, so they also work when run from their own folder (e.g. in RStudio). To check the environment:
 
 ```r
 renv::project()   # .../sturcotte/renv-sturcotte

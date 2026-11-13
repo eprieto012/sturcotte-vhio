@@ -29,8 +29,12 @@ The TIL object is large (2.4 GB on disk): run this on a compute node, not on the
 
 ```{r, warning=FALSE, message=FALSE}
 # --- Define paths ---
-# R is started in renv-sturcotte/ (scripts/interactive-R.sh), so ".." is the project folder
-project_dir <- normalizePath("..", mustWork = TRUE)
+# --- Locate the project folder: works from renv-sturcotte/ (scripts/interactive-R.sh) and from the folder of this script ---
+project_dir <- getwd()
+while (!file.exists(file.path(project_dir, "setup", "setup-m1.R")) && dirname(project_dir) != project_dir) {
+  project_dir <- dirname(project_dir)
+}
+stopifnot(file.exists(file.path(project_dir, "setup", "setup-m1.R")))
 datapath <- file.path(project_dir, "patients")
 til_file <- file.path(project_dir, "til-data", "cite1_2_3_4_5_6_8_withoutPat400304_TCR_ADT_virus_singlets.rds")
 bulk_file <- file.path(datapath, "clonotypes_adaptive_bulk_productivefreqs_update.rds")   # same file as in petasan .../sturcotte/tcrb/

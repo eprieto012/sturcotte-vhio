@@ -26,8 +26,12 @@ The Seurat objects are large (up to ~2.6 GB on disk): run this on a compute node
 
 ```{r, warning=FALSE, message=FALSE}
 # --- Define paths ---
-# R is started in renv-sturcotte/ (scripts/interactive-R.sh), so ".." is the project folder
-project_dir <- normalizePath("..", mustWork = TRUE)
+# --- Locate the project folder: works from renv-sturcotte/ (scripts/interactive-R.sh) and from the folder of this script ---
+project_dir <- getwd()
+while (!file.exists(file.path(project_dir, "setup", "setup-m1.R")) && dirname(project_dir) != project_dir) {
+  project_dir <- dirname(project_dir)
+}
+stopifnot(file.exists(file.path(project_dir, "setup", "setup-m1.R")))
 datapath <- file.path(project_dir, "patients")
 folder_data <- "deconv"
 template_file <- file.path(project_dir, "scripts", "reports", "tcr-umap-viewer-template.html")

@@ -11,8 +11,12 @@ date: "2026-10-22"
 sample <- "pt3385"
 seurat <- "pt3385_SeuObj_scTransform_RegrOut_mt_feat_mkrs_Tcells_W_clonotypes.rds"
 # --- Define paths ---
-# R is started in renv-sturcotte/ (scripts/interactive-R.sh), so ".." is the project folder
-project_dir <- normalizePath("..", mustWork = TRUE)
+# --- Locate the project folder: works from renv-sturcotte/ (scripts/interactive-R.sh) and from the folder of this script ---
+project_dir <- getwd()
+while (!file.exists(file.path(project_dir, "setup", "setup-m1.R")) && dirname(project_dir) != project_dir) {
+  project_dir <- dirname(project_dir)
+}
+stopifnot(file.exists(file.path(project_dir, "setup", "setup-m1.R")))
 datapath <- file.path(project_dir, "patients")
 folder_data <- "deconv"
 datapath_seurat <- "/mnt/petasan_immuno/raw_data/itag/collabs/sturcotte/scSeq/deconv/seurat"
@@ -1310,8 +1314,12 @@ saveRDS(obj_sub, file.path(save_paths$seurat, paste0("obj_", compartment, "_TCR.
 sample <- "pt3385"
 seurat <- "pt3385_SeuObj_scTransform_RegrOut_mt_feat_mkrs_Tcells_W_clonotypes.rds"
 # --- Define paths ---
-# R is started in renv-sturcotte/ (scripts/interactive-R.sh), so ".." is the project folder
-project_dir <- normalizePath("..", mustWork = TRUE)
+# --- Locate the project folder: works from renv-sturcotte/ (scripts/interactive-R.sh) and from the folder of this script ---
+project_dir <- getwd()
+while (!file.exists(file.path(project_dir, "setup", "setup-m1.R")) && dirname(project_dir) != project_dir) {
+  project_dir <- dirname(project_dir)
+}
+stopifnot(file.exists(file.path(project_dir, "setup", "setup-m1.R")))
 datapath <- file.path(project_dir, "patients")
 folder_data <- "deconv"
 datapath_seurat <- "/mnt/petasan_immuno/raw_data/itag/collabs/sturcotte/scSeq/deconv/seurat"
@@ -1573,7 +1581,8 @@ print(table(TCR_priority$response, useNA = "ifany"))
 ```{r}
 # --- Load bulk TCRβ-seq data ---
 bulk_sample <- paste0("CHUM_", sub("^pt", "", sample))
-bulk <- readRDS("/mnt/petasan_immuno/raw_data/itag/collabs/sturcotte/tcrb/clonotypes_adaptive_bulk_productivefreqs_update.rds")
+# Copy of /mnt/petasan_immuno/raw_data/itag/collabs/sturcotte/tcrb/clonotypes_adaptive_bulk_productivefreqs_update.rds
+bulk <- readRDS(file.path(datapath, "clonotypes_adaptive_bulk_productivefreqs_update.rds"))
 bulk_pt <- bulk[[bulk_sample]]
 if (is.null(bulk_pt)) {
   stop("Bulk sample not found: ", bulk_sample)
